@@ -1,0 +1,37 @@
+{
+  "name": "bcd-btos-pos",
+  "version": "1.0.0",
+  "description": "BCD BTOS - Flight search and status powered by Amadeus APIs (NestJS)",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.15",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^11.1.15",
+    "@nestjs/platform-express": "^11.1.15",
+    "@nestjs/serve-static": "^5.0.4",
+    "amadeus": "^11.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "nestjs-pino": "^4.6.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.11.0",
+    "pino-pretty": "^13.1.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
