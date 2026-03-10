@@ -4,20 +4,16 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// SearchAPI.io key (NOT serpapi.com — they are different services)
-const SEARCH_API_KEY = process.env.SEARCH_API_KEY || '3gCkrMcuACGyPvZ9PWYEgMFE';
-const SEARCH_API_BASE = 'https://www.searchapi.io/api/v1/search';
+// Duffel API — test mode token (returns Duffel Airways ZZ flights)
+const DUFFEL_TOKEN = process.env.DUFFEL_TOKEN || 'duffel_test_Dixy1P-73aZbW2MIXv-Qvhy3ScDhZezil-Wh-igrQNk';
+const DUFFEL_BASE  = 'https://api.duffel.com';
 
 // ── RESILIENCE CONFIG ─────────────────────────────────────────────
 const RETRY_ATTEMPTS = 3;
-const RETRY_BASE_MS  = 1000;          // 1s → 3s → 9s exponential backoff
-const REQUEST_TIMEOUT_MS = 30000;     // 30s per attempt
+const RETRY_BASE_MS  = 1000;
+const REQUEST_TIMEOUT_MS = 30000;
 
 // ── CACHE: in-memory, keyed by "ORIGIN-DEST-DATE" ────────────────
-// TTL varies by how far out the departure is:
-//   ≤3 days  → 2 hours  (prices volatile close to departure)
-//   ≤14 days → 6 hours
-//   >14 days → 12 hours (prices rarely change far out)
 const cache = new Map();
 
 function getCacheTTL(departureDate) {
@@ -40,7 +36,6 @@ function getCached(key, ttl) {
 
 function setCache(key, data) {
   cache.set(key, { data, storedAt: Date.now() });
-  // Evict old entries to prevent memory leaks (keep max 500 routes)
   if (cache.size > 500) {
     const oldest = cache.keys().next().value;
     cache.delete(oldest);
@@ -48,11 +43,11 @@ function setCache(key, data) {
 }
 
 // ── FETCH WITH TIMEOUT ────────────────────────────────────────────
-async function fetchWithTimeout(url, timeoutMs) {
+async function fetchWithTimeout(url, options, timeoutMs) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { ...options, signal: controller.signal });
     return res;
   } finally {
     clearTimeout(timer);
@@ -60,18 +55,18 @@ async function fetchWithTimeout(url, timeoutMs) {
 }
 
 // ── RETRY WITH EXPONENTIAL BACKOFF ────────────────────────────────
-async function fetchWithRetry(url, attempts, baseMs) {
+async function fetchWithRetry(url, options, attempts, baseMs) {
   let lastError;
   for (let i = 0; i < attempts; i++) {
     try {
-      const res = await fetchWithTimeout(url, REQUEST_TIMEOUT_MS);
+      const res = await fetchWithTimeout(url, options, REQUEST_TIMEOUT_MS);
       if (res.ok || res.status < 500) return res;
-      lastError = new Error(`SearchAPI returned ${res.status}`);
+      lastError = new Error(`Duffel returned ${res.status}`);
     } catch (err) {
       lastError = err;
     }
     if (i < attempts - 1) {
-      const delay = baseMs * Math.pow(3, i);   // 1s, 3s, 9s
+      const delay = baseMs * Math.pow(3, i);
       console.warn(`Retry ${i + 1}/${attempts - 1} in ${delay}ms...`);
       await new Promise(r => setTimeout(r, delay));
     }
@@ -79,42 +74,33 @@ async function fetchWithRetry(url, attempts, baseMs) {
   throw lastError;
 }
 
-// ── NORMALIZE SearchAPI.io RESPONSE → FLAT FLIGHTS ARRAY ─────────
-function normalizeFlights(json) {
-  const bestFlights  = json.best_flights  || [];
-  const otherFlights = json.other_flights || [];
+// ── NORMALIZE DUFFEL OFFERS → FLAT FLIGHTS ARRAY ─────────────────
+function normalizeOffers(offers) {
+  return offers.map(offer => {
+    const slice = offer.slices?.[0];
+    if (!slice) return null;
 
-  return [...bestFlights, ...otherFlights].map(group => {
-    const segs = group.flights || [];
+    const segs = slice.segments || [];
     const first = segs[0];
     const last  = segs[segs.length - 1];
     if (!first) return null;
 
-    const logoUrl = first.airline_logo || '';
-    const codeMatch = logoUrl.match(/\/(\w{2})\.png/);
-    const iataCode = codeMatch ? codeMatch[1] : '';
-
-    const flightNumber = (first.flight_number || '').replace(/\s+/g, '');
-
-    const depDate = first.departure_airport?.date || '';
-    const depTime = first.departure_airport?.time || '';
-    const arrDate = last.arrival_airport?.date || '';
-    const arrTime = last.arrival_airport?.time || '';
-
-    const totalMin = group.total_duration || 0;
-    const durH = Math.floor(totalMin / 60);
-    const durM = totalMin % 60;
+    const iataCode    = first.marketing_carrier?.iata_code || '';
+    const airlineName = first.marketing_carrier?.name || '';
+    const flightNum   = first.marketing_carrier_flight_number || '';
+    const flightNumber = `${iataCode}${flightNum}`;
 
     return {
       airline: iataCode,
-      airlineName: first.airline || '',
+      airlineName,
       flightNumber,
-      departureTime: depDate && depTime ? `${depDate}T${depTime}` : null,
-      arrivalTime:   arrDate && arrTime ? `${arrDate}T${arrTime}` : null,
-      price: group.price != null ? String(group.price) : null,
-      currency: 'JPY',
-      duration: `PT${durH}H${durM}M`,
+      departureTime: first.departing_at || null,
+      arrivalTime:   last.arriving_at || null,
+      price: offer.total_amount || null,
+      currency: offer.total_currency || 'JPY',
+      duration: slice.duration || null,
       stops: segs.length > 1 ? segs.length - 1 : 0,
+      offerId: offer.id,
     };
   })
   .filter(f => f && f.price != null)
@@ -136,7 +122,7 @@ app.get('/api/flights', async (req, res) => {
   const key = cacheKey(o, d, date);
   const ttl = getCacheTTL(date);
 
-  // 1. Check cache — return immediately if fresh
+  // 1. Check cache
   const cached = getCached(key, ttl);
   if (cached?.fresh) {
     const ageMin = Math.round(cached.age / 60000);
@@ -144,38 +130,50 @@ app.get('/api/flights', async (req, res) => {
     return res.json({ ...cached.data, cached: true, cacheAgeMin: ageMin });
   }
 
-  // 2. Call SearchAPI.io with retry + timeout
-  const params = new URLSearchParams({
-    engine: 'google_flights',
-    departure_id: o,
-    arrival_id: d,
-    outbound_date: date,
-    flight_type: 'one_way',
-    currency: 'JPY',
-    hl: 'ja',
-    gl: 'jp',
-    adults: '1',
-    included_airlines: 'JL,NH',
-    api_key: SEARCH_API_KEY,
-  });
+  // 2. Call Duffel Offer Requests API
+  const body = {
+    data: {
+      slices: [{
+        origin: o,
+        destination: d,
+        departure_date: date,
+      }],
+      passengers: [{ type: 'adult' }],
+      cabin_class: 'economy',
+    },
+  };
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${DUFFEL_TOKEN}`,
+      'Duffel-Version': 'v2',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(body),
+  };
 
   try {
-    const apiRes = await fetchWithRetry(`${SEARCH_API_BASE}?${params}`, RETRY_ATTEMPTS, RETRY_BASE_MS);
+    const apiRes = await fetchWithRetry(
+      `${DUFFEL_BASE}/air/offer_requests?return_offers=true`,
+      fetchOptions, RETRY_ATTEMPTS, RETRY_BASE_MS
+    );
     const json = await apiRes.json();
 
-    if (json.error) {
-      // API returned an error — serve stale cache if available
+    if (json.errors) {
+      const errMsg = json.errors.map(e => e.message).join('; ');
       if (cached) {
-        console.warn(`[STALE FALLBACK] ${key} — API error: ${json.error}`);
+        console.warn(`[STALE FALLBACK] ${key} — Duffel error: ${errMsg}`);
         return res.json({ ...cached.data, cached: true, stale: true });
       }
-      return res.status(502).json({ error: json.error });
+      return res.status(502).json({ error: errMsg });
     }
 
-    const flights = normalizeFlights(json);
+    const offers = json.data?.offers || [];
+    const flights = normalizeOffers(offers);
     const result = { flights, count: flights.length };
 
-    // Store in cache
     setCache(key, result);
     console.log(`[API OK] ${key} — ${flights.length} flights, cached for ${ttl / 3600000}h`);
 
@@ -183,7 +181,6 @@ app.get('/api/flights', async (req, res) => {
   } catch (err) {
     console.error(`[API FAIL] ${key} —`, err.message);
 
-    // 3. Stale-while-revalidate: serve old cache if API is down
     if (cached) {
       const ageMin = Math.round(cached.age / 60000);
       console.warn(`[STALE FALLBACK] ${key} — serving ${ageMin}m old cache`);
@@ -209,5 +206,6 @@ app.use((_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`BTOS server running on http://localhost:${PORT}`);
+  console.log(`Provider: Duffel API (${DUFFEL_TOKEN.startsWith('duffel_test_') ? 'TEST mode' : 'LIVE mode'})`);
   console.log(`Resilience: ${RETRY_ATTEMPTS} retries, ${REQUEST_TIMEOUT_MS / 1000}s timeout, smart TTL cache`);
 });

@@ -5154,7 +5154,7 @@
          * ║  6. TIME HELPERS                 – "now" button for route      ║
          * ║  7. PAGE INIT                    – date defaults, lucide icons ║
          * ║  8. ROUTE SEARCH DATA            – mock route results          ║
-         * ║  9. SERPAPI GOOGLE FLIGHTS        – real fares via Node proxy   ║
+         * ║  9. DUFFEL FLIGHT SEARCH          – fares via Node proxy        ║
          * ╚══════════════════════════════════════════════════════════════════╝
          */
 
@@ -6707,9 +6707,9 @@
             }
         };
 
-        // --- 9. SERPAPI GOOGLE FLIGHTS (via Node.js proxy at /api/flights) ---
-        // The browser calls our Express proxy which forwards to SerpAPI,
-        // avoiding CORS issues. Prices come back in JPY directly.
+        // --- 9. DUFFEL FLIGHT SEARCH (via Node.js proxy at /api/flights) ---
+        // The browser calls our Express proxy which forwards to Duffel API,
+        // avoiding CORS issues. Duffel returns offers with pricing.
 
         // Parses ISO 8601 duration "PT2H30M" → "2h 30m"
         function fmtDur(iso) {
