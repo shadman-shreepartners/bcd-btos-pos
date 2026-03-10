@@ -7,6 +7,9 @@
     <title>BTOS - Business Travel Order System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Flatpickr: Skyscanner-style calendar date picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         /*
          * ╔══════════════════════════════════════════════════════════════════╗
@@ -418,7 +421,7 @@
         }
 
         /* Modern Date Input Styling */
-        /* ── DATE INPUT: styled wrapper around native <input type="date"> ──────── */
+        /* ── DATE INPUT: styled wrapper, enhanced by Flatpickr calendar ──────── */
         .modern-date-container {
             position: relative;
             display: flex;
@@ -587,19 +590,133 @@
             cursor: pointer;
         }
 
-        /* Hide native calendar picker indicator in Chrome/Safari to use custom icon */
+        /* Hide native calendar picker indicator — Flatpickr handles the popup */
         .modern-date-input::-webkit-calendar-picker-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            color: transparent;
-            cursor: pointer;
+            display: none !important;
         }
+        .modern-date-input::-webkit-inner-spin-button {
+            display: none !important;
+        }
+
+        /* ── FLATPICKR: Skyscanner-style Calendar Theme ───────────────── */
+        .flatpickr-calendar {
+            border: none !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08) !important;
+            font-family: 'Inter', sans-serif !important;
+            padding: 8px !important;
+            width: 320px !important;
+        }
+        .flatpickr-months {
+            padding: 8px 4px 4px !important;
+            align-items: center !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            height: 36px !important;
+        }
+        .flatpickr-current-month {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+            padding-top: 4px !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-current-month input.cur-year {
+            font-weight: 700 !important;
+            font-size: 15px !important;
+            color: #1e293b !important;
+        }
+        .flatpickr-months .flatpickr-prev-month,
+        .flatpickr-months .flatpickr-next-month {
+            padding: 8px !important;
+            fill: #64748b !important;
+            transition: all 0.15s !important;
+            border-radius: 8px !important;
+        }
+        .flatpickr-months .flatpickr-prev-month:hover,
+        .flatpickr-months .flatpickr-next-month:hover {
+            background: #f1f5f9 !important;
+            fill: #f26522 !important;
+        }
+        .flatpickr-weekdays {
+            padding: 0 4px !important;
+        }
+        span.flatpickr-weekday {
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            color: #94a3b8 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+        }
+        .flatpickr-days {
+            padding: 0 4px 4px !important;
+        }
+        .dayContainer {
+            min-width: 296px !important;
+            max-width: 296px !important;
+        }
+        .flatpickr-day {
+            max-width: 40px !important;
+            height: 40px !important;
+            line-height: 40px !important;
+            border-radius: 10px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #334155 !important;
+            border: none !important;
+            margin: 1px !important;
+            transition: all 0.15s ease !important;
+        }
+        .flatpickr-day:hover {
+            background: #fff7ed !important;
+            color: #f26522 !important;
+        }
+        .flatpickr-day.today {
+            background: #f1f5f9 !important;
+            color: #f26522 !important;
+            font-weight: 700 !important;
+        }
+        .flatpickr-day.today:hover {
+            background: #fff7ed !important;
+        }
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background: #f26522 !important;
+            color: white !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(242,101,34,0.35) !important;
+        }
+        .flatpickr-day.flatpickr-disabled,
+        .flatpickr-day.flatpickr-disabled:hover,
+        .flatpickr-day.prevMonthDay,
+        .flatpickr-day.nextMonthDay {
+            color: #cbd5e1 !important;
+            background: transparent !important;
+        }
+        .flatpickr-day.prevMonthDay:hover,
+        .flatpickr-day.nextMonthDay:hover {
+            color: #cbd5e1 !important;
+            background: transparent !important;
+        }
+        .numInputWrapper:hover { background: transparent !important; }
+        .numInputWrapper span { display: none !important; }
+        .flatpickr-monthDropdown-months:hover { background: #f8fafc !important; }
+
+        /* Year dropdown: matches month dropdown style */
+        .fp-year-select {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            appearance: auto;
+            -webkit-appearance: menulist;
+        }
+        .fp-year-select:hover { background: #f8fafc; border-radius: 4px; }
 
         /* Profile Specific Styles */
         .profile-tab-active {
@@ -2760,7 +2877,7 @@
                                                         class="required-mark">*</span></div>
                                                 <div class="jr-input-col">
                                                     <div class="modern-date-container">
-                                                        <input type="date" id="jr-departure-date"
+                                                        <input type="text" data-calendar id="jr-departure-date"
                                                             class="modern-date-input">
                                                         <i data-lucide="calendar" class="modern-date-icon w-4 h-4"></i>
                                                     </div>
@@ -2926,7 +3043,7 @@
                                                         class="required-mark">*</span></div>
                                                 <div class="jr-input-col">
                                                     <div class="modern-date-container">
-                                                        <input type="date" id="air-date" class="modern-date-input">
+                                                        <input type="text" data-calendar id="air-date" class="modern-date-input">
                                                         <i data-lucide="calendar" class="modern-date-icon w-4 h-4"></i>
                                                     </div>
                                                 </div>
@@ -2951,7 +3068,7 @@
                                             <div id="flight-search-results" class="hidden">
                                                 <div id="flight-search-loader" class="hidden flex items-center gap-3 py-6">
                                                     <div class="w-5 h-5 border-2 border-orange-200 border-t-[#f26522] rounded-full animate-spin"></div>
-                                                    <span class="text-xs text-slate-500 font-medium">Searching flight offers...</span>
+                                                    <span class="text-xs text-slate-500 font-medium">Searching flights...</span>
                                                 </div>
                                                 <div id="flight-search-error" class="hidden bg-red-50 border border-red-100 rounded-xl p-4">
                                                     <div class="flex items-start gap-2">
@@ -2964,7 +3081,10 @@
                                                     <p class="text-xs text-slate-400 font-medium">No flights found for this route and date.</p>
                                                 </div>
                                                 <div id="flight-search-table" class="hidden">
-                                                    <p id="flight-results-count" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2"></p>
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <p id="flight-results-count" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider"></p>
+                                                        <p id="flight-results-date" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider"></p>
+                                                    </div>
                                                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                                                         <table class="w-full text-xs">
                                                             <thead>
@@ -3066,7 +3186,7 @@
                                                         <span
                                                             class="text-[9px] text-slate-400 font-bold uppercase tracking-tight ml-1">Check-in</span>
                                                         <div class="modern-date-container">
-                                                            <input type="date" id="hotel-checkin"
+                                                            <input type="text" data-calendar id="hotel-checkin"
                                                                 class="modern-date-input">
                                                             <i data-lucide="calendar"
                                                                 class="modern-date-icon w-4 h-4"></i>
@@ -3077,7 +3197,7 @@
                                                         <span
                                                             class="text-[9px] text-slate-400 font-bold uppercase tracking-tight ml-1">Check-out</span>
                                                         <div class="modern-date-container">
-                                                            <input type="date" id="hotel-checkout"
+                                                            <input type="text" data-calendar id="hotel-checkout"
                                                                 class="modern-date-input">
                                                             <i data-lucide="calendar"
                                                                 class="modern-date-icon w-4 h-4"></i>
@@ -3258,7 +3378,7 @@
                                                         class="required-mark">*</span></div>
                                                 <div class="jr-input-col flex-wrap !gap-y-3">
                                                     <div class="modern-date-container">
-                                                        <input type="date" id="car-date" class="modern-date-input">
+                                                        <input type="text" data-calendar id="car-date" class="modern-date-input">
                                                         <i data-lucide="calendar" class="modern-date-icon w-4 h-4"></i>
                                                     </div>
                                                     <div class="modern-time-container">
@@ -3285,7 +3405,7 @@
                                                         class="required-mark">*</span></div>
                                                 <div class="jr-input-col flex-wrap !gap-y-3">
                                                     <div class="modern-date-container">
-                                                        <input type="date" id="car-return-date"
+                                                        <input type="text" data-calendar id="car-return-date"
                                                             class="modern-date-input">
                                                         <i data-lucide="calendar" class="modern-date-icon w-4 h-4"></i>
                                                     </div>
@@ -3418,7 +3538,7 @@
                                                     <!-- Below tabs date/time selectors -->
                                                     <div class="flex items-center gap-2 flex-wrap">
                                                         <div class="modern-date-container">
-                                                            <input type="date" id="route-date" class="modern-date-input">
+                                                            <input type="text" data-calendar id="route-date" class="modern-date-input">
                                                             <i data-lucide="calendar"
                                                                 class="modern-date-icon w-4 h-4"></i>
                                                         </div>
@@ -3825,7 +3945,7 @@
                                                 Expected delivery date <span class="required-mark">*</span></label>
                                             <div class="flex flex-wrap items-center gap-4">
                                                 <div class="modern-date-container">
-                                                    <input type="date" class="modern-date-input">
+                                                    <input type="text" data-calendar class="modern-date-input">
                                                     <i data-lucide="calendar" class="modern-date-icon w-4 h-4"></i>
                                                 </div>
                                                 <div class="flex items-center gap-2">
@@ -3988,12 +4108,12 @@
                                 <label class="material-date-label app-label shrink-0 w-32 pt-3">target period <span class="text-red-600">*</span></label>
                                 <div class="flex flex-wrap items-center gap-3 flex-1">
                                     <div class="material-date-field flex-1 min-w-[160px]">
-                                        <input type="date" id="reports-start-date" class="material-date-input" value="2026-03-01" aria-label="Target period start date">
+                                        <input type="text" data-calendar id="reports-start-date" class="material-date-input" value="2026-03-01" aria-label="Target period start date">
                                         <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                     </div>
                                     <span class="text-slate-400 font-medium shrink-0">~</span>
                                     <div class="material-date-field flex-1 min-w-[160px]">
-                                        <input type="date" id="reports-end-date" class="material-date-input" value="2026-03-31" aria-label="Target period end date">
+                                        <input type="text" data-calendar id="reports-end-date" class="material-date-input" value="2026-03-31" aria-label="Target period end date">
                                         <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                     </div>
                                 </div>
@@ -4021,12 +4141,12 @@
                             <label class="material-date-label text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 block">Date of Issue</label>
                             <div class="flex items-center gap-3 flex-wrap">
                                 <div class="material-date-field flex-1 min-w-[140px]">
-                                    <input type="date" id="bulletin-issue-start" class="material-date-input" value="2021-10-29" aria-label="Date of issue start">
+                                    <input type="text" data-calendar id="bulletin-issue-start" class="material-date-input" value="2021-10-29" aria-label="Date of issue start">
                                     <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                 </div>
                                 <span class="text-slate-400 font-medium shrink-0">–</span>
                                 <div class="material-date-field flex-1 min-w-[140px]">
-                                    <input type="date" id="bulletin-issue-end" class="material-date-input" value="2021-10-29" aria-label="Date of issue end">
+                                    <input type="text" data-calendar id="bulletin-issue-end" class="material-date-input" value="2021-10-29" aria-label="Date of issue end">
                                     <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                 </div>
                             </div>
@@ -4035,12 +4155,12 @@
                             <label class="material-date-label text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 block">Post Period</label>
                             <div class="flex items-center gap-3 flex-wrap">
                                 <div class="material-date-field flex-1 min-w-[140px]">
-                                    <input type="date" id="bulletin-post-start" class="material-date-input" value="2022-10-14" aria-label="Post period start">
+                                    <input type="text" data-calendar id="bulletin-post-start" class="material-date-input" value="2022-10-14" aria-label="Post period start">
                                     <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                 </div>
                                 <span class="text-slate-400 font-medium shrink-0">–</span>
                                 <div class="material-date-field flex-1 min-w-[140px]">
-                                    <input type="date" id="bulletin-post-end" class="material-date-input" value="2024-11-27" aria-label="Post period end">
+                                    <input type="text" data-calendar id="bulletin-post-end" class="material-date-input" value="2024-11-27" aria-label="Post period end">
                                     <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                                 </div>
                             </div>
@@ -4310,11 +4430,11 @@
                         </div>
                         <div class="form-group">
                             <label>Request Date (from)</label>
-                            <input type="date" class="w-full">
+                            <input type="text" data-calendar class="w-full">
                         </div>
                         <div class="form-group">
                             <label>Request Date (to)</label>
-                            <input type="date" class="w-full">
+                            <input type="text" data-calendar class="w-full">
                         </div>
                         <div class="form-group">
                             <label>Traveler</label>
@@ -4421,12 +4541,12 @@
                         <label class="app-label block mb-2">Departure Date</label>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-depart-start" class="material-date-input" value="2026-03-05">
+                                <input type="text" data-calendar id="res-filter-depart-start" class="material-date-input" value="2026-03-05">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                             <span class="text-slate-400 font-medium">~</span>
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-depart-end" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-depart-end" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                         </div>
@@ -4435,12 +4555,12 @@
                         <label class="app-label block mb-2">Return Date</label>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-return-start" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-return-start" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                             <span class="text-slate-400 font-medium">~</span>
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-return-end" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-return-end" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                         </div>
@@ -4449,12 +4569,12 @@
                         <label class="app-label block mb-2">Settlement Date</label>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-settlement-start" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-settlement-start" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                             <span class="text-slate-400 font-medium">~</span>
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-settlement-end" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-settlement-end" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                         </div>
@@ -4471,12 +4591,12 @@
                         <label class="app-label block mb-2">Receive / Expected delivery date</label>
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-delivery-start" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-delivery-start" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                             <span class="text-slate-400 font-medium">~</span>
                             <div class="material-date-field flex-1 min-w-[140px]">
-                                <input type="date" id="res-filter-delivery-end" class="material-date-input">
+                                <input type="text" data-calendar id="res-filter-delivery-end" class="material-date-input">
                                 <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                             </div>
                         </div>
@@ -4557,12 +4677,12 @@
                     </label>
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="material-date-field flex-1 min-w-[140px]">
-                            <input type="date" id="issue-bulletin-post-start" class="material-date-input" value="2026-03-04" aria-label="Post period start">
+                            <input type="text" data-calendar id="issue-bulletin-post-start" class="material-date-input" value="2026-03-04" aria-label="Post period start">
                             <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                         </div>
                         <span class="text-slate-400 font-medium shrink-0">–</span>
                         <div class="material-date-field flex-1 min-w-[140px]">
-                            <input type="date" id="issue-bulletin-post-end" class="material-date-input" aria-label="Post period end">
+                            <input type="text" data-calendar id="issue-bulletin-post-end" class="material-date-input" aria-label="Post period end">
                             <i data-lucide="calendar" class="material-date-icon w-4 h-4"></i>
                         </div>
                     </div>
@@ -5034,7 +5154,7 @@
          * ║  6. TIME HELPERS                 – "now" button for route      ║
          * ║  7. PAGE INIT                    – date defaults, lucide icons ║
          * ║  8. ROUTE SEARCH DATA            – mock route results          ║
-         * ║  9. AMADEUS DIRECT API           – browser-side flight search  ║
+         * ║  9. SERPAPI GOOGLE FLIGHTS        – real fares via Node proxy   ║
          * ╚══════════════════════════════════════════════════════════════════╝
          */
 
@@ -6125,43 +6245,86 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
 
-            // Booking date fields: default = today, min = today (no past dates)
+            /* ── Flatpickr: Skyscanner-style Calendar Initialization ──────
+               All [data-calendar] inputs get a Flatpickr instance.
+               - Booking dates: default today, min today
+               - Return dates: default tomorrow, min today
+               - Date pairs (checkin→checkout): changing start pushes end forward */
+            /* Replaces the default Flatpickr year number-input with a <select> dropdown */
+            function addYearDropdown(instance) {
+                const wrapper = instance.calendarContainer.querySelector('.flatpickr-current-month');
+                if (!wrapper) return;
+                const numWrap = wrapper.querySelector('.numInputWrapper');
+                if (!numWrap) return;
+                let sel = wrapper.querySelector('.fp-year-select');
+                if (sel) { sel.value = instance.currentYear; return; }
+                sel = document.createElement('select');
+                sel.className = 'fp-year-select';
+                const curY = new Date().getFullYear();
+                for (let y = curY; y <= curY + 1; y++) {
+                    const opt = document.createElement('option');
+                    opt.value = y; opt.textContent = y;
+                    if (y === instance.currentYear) opt.selected = true;
+                    sel.appendChild(opt);
+                }
+                sel.addEventListener('change', () => instance.changeYear(parseInt(sel.value)));
+                numWrap.replaceWith(sel);
+            }
+
+            const maxDate = new Date(today);
+            maxDate.setFullYear(maxDate.getFullYear() + 1);
+            const maxDateStr = `${maxDate.getFullYear()}-${String(maxDate.getMonth()+1).padStart(2,'0')}-${String(maxDate.getDate()).padStart(2,'0')}`;
+
+            const fpBase = {
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'D, d M Y',
+                disableMobile: true,
+                animate: true,
+                minDate: todayStr,
+                maxDate: maxDateStr,
+                onReady(_, __, fp) { addYearDropdown(fp); },
+                onYearChange(_, __, fp) { addYearDropdown(fp); },
+            };
+
             const bookingDateIds = [
-                'jr-departure-date',   // Journey departure
-                'air-date',            // Airlines flight date
-                'hotel-checkin',       // Hotel check-in
-                'car-date',            // Car rental pick-up
-                'route-date',          // Route search
+                'jr-departure-date', 'air-date', 'hotel-checkin',
+                'car-date', 'route-date',
             ];
+            const fpInstances = {};
             bookingDateIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.min   = todayStr;
-                el.value = todayStr;
+                fpInstances[id] = flatpickr(el, { ...fpBase, defaultDate: todayStr });
             });
 
-            // Check-out / return dates: default = tomorrow, min = today
             const returnDateIds = ['hotel-checkout', 'car-return-date'];
             returnDateIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.min   = todayStr;
-                el.value = tomStr;
+                fpInstances[id] = flatpickr(el, { ...fpBase, defaultDate: tomStr });
             });
 
-            // Enforce: changing a start date pushes the paired end date forward
             const datePairs = [
-                ['hotel-checkin',  'hotel-checkout'],
-                ['car-date',       'car-return-date'],
+                ['hotel-checkin', 'hotel-checkout'],
+                ['car-date', 'car-return-date'],
             ];
             datePairs.forEach(([startId, endId]) => {
-                const startEl = document.getElementById(startId);
-                const endEl   = document.getElementById(endId);
-                if (!startEl || !endEl) return;
-                startEl.addEventListener('change', () => {
-                    endEl.min = startEl.value;
-                    if (endEl.value < startEl.value) endEl.value = startEl.value;
+                const startFp = fpInstances[startId];
+                const endFp   = fpInstances[endId];
+                if (!startFp || !endFp) return;
+                startFp.config.onChange.push((selDates) => {
+                    if (selDates[0]) {
+                        endFp.set('minDate', selDates[0]);
+                        if (endFp.selectedDates[0] < selDates[0]) endFp.setDate(selDates[0]);
+                    }
                 });
+            });
+
+            // Initialize Flatpickr on remaining [data-calendar] inputs not yet handled
+            document.querySelectorAll('[data-calendar]').forEach(el => {
+                if (el._flatpickr) return;
+                flatpickr(el, { ...fpBase, defaultDate: el.value || null, minDate: null });
             });
         };
 
@@ -6544,37 +6707,23 @@
             }
         };
 
-        // --- 9. AMADEUS DIRECT API (browser fetch, no backend) ---
-        // Calls test.api.amadeus.com directly from browser using OAuth2.
-        // Token is cached and auto-refreshed. Only for POC/test keys.
-        const AMADEUS_BASE = 'https://test.api.amadeus.com';
-        const AMADEUS_CLIENT_ID = 'uQn3BPlNTr4dT7cG5fqcA5aFuI4b74oo';
-        const AMADEUS_CLIENT_SECRET = '4wuY8vABIrZsfY76';
-        let _tokenCache = { token: null, expiresAt: 0 };
+        // --- 9. SERPAPI GOOGLE FLIGHTS (via Node.js proxy at /api/flights) ---
+        // The browser calls our Express proxy which forwards to SerpAPI,
+        // avoiding CORS issues. Prices come back in JPY directly.
 
-        async function getAmadeusToken() {
-            if (_tokenCache.token && Date.now() < _tokenCache.expiresAt) return _tokenCache.token;
-            const res = await fetch(`${AMADEUS_BASE}/v1/security/oauth2/token`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `grant_type=client_credentials&client_id=${AMADEUS_CLIENT_ID}&client_secret=${AMADEUS_CLIENT_SECRET}`,
-            });
-            if (!res.ok) throw new Error('Token request failed: ' + res.status);
-            const data = await res.json();
-            _tokenCache = { token: data.access_token, expiresAt: Date.now() + (data.expires_in - 30) * 1000 };
-            return _tokenCache.token;
-        }
-
+        // Parses ISO 8601 duration "PT2H30M" → "2h 30m"
         function fmtDur(iso) {
             if (!iso) return '\u2014';
             const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
             return m ? `${m[1]||'0'}h ${m[2]||'0'}m` : iso;
         }
+
+        // Extracts date + time from "2026-03-10T20:30" strings
         function fmtDT(s) {
             if (!s) return { time: '\u2014', date: '' };
-            const d = new Date(s);
-            if (isNaN(d)) return { time: '\u2014', date: '' };
-            return { time: d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false}), date: d.toISOString().split('T')[0] };
+            const m = s.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+            if (!m) return { time: '\u2014', date: '' };
+            return { time: m[2], date: m[1] };
         }
 
         window.searchFlightSchedules = async () => {
@@ -6599,59 +6748,47 @@
             table.classList.add('hidden');
 
             try {
-                const token = await getAmadeusToken();
-                const params = new URLSearchParams({
-                    originLocationCode: origin, destinationLocationCode: dest,
-                    departureDate: date, adults: '1', max: '50',
-                });
-                const res = await fetch(`${AMADEUS_BASE}/v2/shopping/flight-offers?${params}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                // Call our Node.js proxy which forwards to SerpAPI
+                const params = new URLSearchParams({ origin, destination: dest, date });
+                const res = await fetch(`/api/flights?${params}`);
                 const json = await res.json();
                 loader.classList.add('hidden');
 
-                if (!res.ok) {
-                    errorMsg.textContent = json?.errors?.[0]?.detail || json?.error_description || `Amadeus error: ${res.status}`;
+                if (!res.ok || json.error) {
+                    errorMsg.textContent = json.error || `Server error: ${res.status}`;
                     errorEl.classList.remove('hidden');
                     lucide.createIcons();
                     return;
                 }
 
-                const offers = json?.data;
-                if (!Array.isArray(offers) || offers.length === 0) {
+                const flights = json.flights || [];
+                if (flights.length === 0) {
                     empty.classList.remove('hidden');
                     lucide.createIcons();
                     return;
                 }
 
-                const flights = offers.map(o => {
-                    const segs = o.itineraries?.[0]?.segments ?? [];
-                    const f = segs[0], l = segs[segs.length-1];
-                    return {
-                        airline: f?.carrierCode ?? null,
-                        flightNumber: f ? `${f.carrierCode}${f.number}` : null,
-                        departureTime: f?.departure?.at ?? null,
-                        arrivalTime: l?.arrival?.at ?? null,
-                        price: o.price?.grandTotal ?? null,
-                        currency: o.price?.currency ?? null,
-                        duration: o.itineraries?.[0]?.duration ?? null,
-                        stops: segs.length > 1 ? segs.length - 1 : 0,
-                    };
-                }).sort((a,b) => (a.departureTime??'').localeCompare(b.departureTime??''));
+                // Format date for header: "Tuesday, 11 March"
+                const dObj = new Date(date + 'T00:00:00');
+                const dateDisplay = !isNaN(dObj)
+                    ? `${dObj.toLocaleString('en-US',{weekday:'long'})}, ${String(dObj.getDate()).padStart(2,'0')} ${dObj.toLocaleString('en-US',{month:'long'})}`
+                    : date;
 
                 document.getElementById('flight-results-count').textContent =
                     `${origin} \u2192 ${dest} \u00b7 ${flights.length} flight${flights.length===1?'':'s'}`;
+                document.getElementById('flight-results-date').textContent = dateDisplay;
 
+                // Build table rows — prices are already in JPY from SerpAPI
                 document.getElementById('flight-results-tbody').innerHTML = flights.map(f => {
                     const dep = fmtDT(f.departureTime), arr = fmtDT(f.arrivalTime);
                     const dur = fmtDur(f.duration);
-                    const price = f.price ? `${f.currency||''} ${f.price}` : '\u2014';
+                    const price = f.price ? `JPY ${parseInt(f.price, 10).toLocaleString()}` : '\u2014';
                     const stops = f.stops===0 ? 'Direct' : f.stops!=null ? f.stops+' stop'+(f.stops===1?'':'s') : '\u2014';
-                    const enc = btoa(JSON.stringify(f));
+                    const enc = btoa(unescape(encodeURIComponent(JSON.stringify(f))));
                     return `<tr data-flight-enc="${enc}" class="flight-row hover:bg-orange-50/40 transition-colors cursor-pointer">
-                        <td class="p-2.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-50 text-blue-600 border border-blue-100">${f.airline||'\u2014'}</span></td>
+                        <td class="p-2.5"><img src="https://www.gstatic.com/flights/airline_logos/70px/${f.airline}.png" alt="${f.airline}" class="h-7 w-auto rounded" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-50 text-blue-600 border border-blue-100',textContent:this.alt||'\u2014'}))"></td>
                         <td class="p-2.5 font-bold text-slate-800 tracking-wide">${f.flightNumber||'\u2014'}</td>
-                        <td class="p-2.5"><span class="font-semibold text-slate-700">${dep.time}</span>${dep.date?'<span class="text-[9px] text-slate-400 ml-1">'+dep.date+'</span>':''}</td>
+                        <td class="p-2.5"><span class="font-semibold text-slate-700">${dep.time}</span></td>
                         <td class="p-2.5 font-semibold text-slate-700">${arr.time}</td>
                         <td class="p-2.5 text-slate-600 text-[10px] font-medium">${dur}</td>
                         <td class="p-2.5"><span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${stops==='Direct'?'bg-green-50 text-green-600':'bg-orange-50 text-orange-600'}">${stops}</span></td>
@@ -6665,17 +6802,25 @@
             } catch (e) {
                 console.error('Flight search failed:', e);
                 loader.classList.add('hidden');
-                errorMsg.textContent = 'Amadeus API call failed: ' + e.message;
+                errorMsg.textContent = 'Flight search failed: ' + e.message;
                 errorEl.classList.remove('hidden');
                 lucide.createIcons();
             }
         };
 
+        /* ── Select Flight ────────────────────────────────────────────────
+           Called when user clicks "Select" on a flight row.
+           1. Auto-fills carrier & flight number fields (locked/read-only)
+           2. Auto-fills departure date
+           3. Highlights selected row, dims all others (fully locked, no hover)
+           4. Changes button to green "Selected", disables all other buttons
+           5. Shows "Clear Selection" button to undo ── */
         window.selectFlightResult = (encoded) => {
-            const f = JSON.parse(atob(encoded));
+            const f = JSON.parse(decodeURIComponent(escape(atob(encoded))));
             const carrier = document.getElementById('air-carrier');
             const fn = document.getElementById('air-flight-no');
 
+            /* Auto-fill & lock carrier dropdown */
             if (carrier && f.airline) {
                 const match = Array.from(carrier.options).find(o => o.value === f.airline);
                 if (match) {
@@ -6683,35 +6828,47 @@
                 } else {
                     carrier.value = '';
                 }
-                // Lock carrier so user can't change the auto-filled value
                 carrier.disabled = true;
                 carrier.classList.add('opacity-60', 'cursor-not-allowed');
             }
+
+            /* Auto-fill & lock flight number */
             if (fn) {
                 fn.value = f.flightNumber || '';
                 fn.readOnly = true;
                 fn.classList.add('opacity-60', 'cursor-not-allowed');
             }
+
+            /* Auto-fill departure date */
             if (f.departureTime) {
                 const p = fmtDT(f.departureTime);
                 const dateEl = document.getElementById('air-date');
                 if (p.date && dateEl) dateEl.value = p.date;
             }
 
-            // Show the "Clear Selection" button
             const clearBtn = document.getElementById('air-clear-selection');
             if (clearBtn) clearBtn.classList.remove('hidden');
 
-            // Highlight the selected row, de-highlight others
+            /* Lock table: highlight chosen row, dim & disable others, remove hover */
             document.querySelectorAll('.flight-row').forEach(row => {
-                row.classList.remove('bg-orange-100', 'ring-1', 'ring-orange-300');
+                row.classList.remove('bg-orange-100', 'ring-1', 'ring-orange-300', 'opacity-40', 'pointer-events-none');
+                row.classList.remove('hover:bg-orange-50/40', 'cursor-pointer');
+                row.classList.add('cursor-default');
+                const btn = row.querySelector('button');
+                if (row.dataset.flightEnc === encoded) {
+                    row.classList.add('bg-orange-100', 'ring-1', 'ring-orange-300');
+                    if (btn) { btn.textContent = 'Selected'; btn.disabled = true; btn.classList.add('bg-green-600', 'hover:bg-green-600'); btn.classList.remove('bg-[#f26522]', 'hover:bg-orange-600'); }
+                } else {
+                    row.classList.add('opacity-40', 'pointer-events-none');
+                    if (btn) { btn.disabled = true; }
+                }
             });
             const selectedRow = document.querySelector(`.flight-row[data-flight-enc="${encoded}"]`);
             if (selectedRow) {
-                selectedRow.classList.add('bg-orange-100', 'ring-1', 'ring-orange-300');
                 selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
+            /* Brief orange flash on the form to confirm selection */
             const form = document.getElementById('subtab-airlines');
             if (form) {
                 form.style.borderColor = '#f26522';
@@ -6721,16 +6878,25 @@
             lucide.createIcons();
         };
 
+        /* ── Clear Flight Selection ──────────────────────────────────────
+           Resets everything done by selectFlightResult:
+           - Unlocks carrier & flight number fields
+           - Restores all rows to normal (hover, pointer, opacity)
+           - Re-enables all "Select" buttons
+           - Hides the "Clear Selection" button ── */
         window.clearFlightSelection = () => {
             const carrier = document.getElementById('air-carrier');
             const fn = document.getElementById('air-flight-no');
             if (carrier) { carrier.disabled = false; carrier.value = ''; carrier.classList.remove('opacity-60', 'cursor-not-allowed'); }
             if (fn) { fn.readOnly = false; fn.value = ''; fn.classList.remove('opacity-60', 'cursor-not-allowed'); }
-            // Remove row highlight
+
             document.querySelectorAll('.flight-row').forEach(row => {
-                row.classList.remove('bg-orange-100', 'ring-1', 'ring-orange-300');
+                row.classList.remove('bg-orange-100', 'ring-1', 'ring-orange-300', 'opacity-40', 'pointer-events-none', 'cursor-default');
+                row.classList.add('hover:bg-orange-50/40', 'cursor-pointer');
+                const btn = row.querySelector('button');
+                if (btn) { btn.textContent = 'Select'; btn.disabled = false; btn.classList.remove('bg-green-600', 'hover:bg-green-600'); btn.classList.add('bg-[#f26522]', 'hover:bg-orange-600'); }
             });
-            // Hide the clear button
+
             const clearBtn = document.getElementById('air-clear-selection');
             if (clearBtn) clearBtn.classList.add('hidden');
         };
