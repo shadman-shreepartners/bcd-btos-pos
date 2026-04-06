@@ -1,0 +1,9 @@
+@use "./tokens";
+
+// Minimal global rules. Layout surfaces (html/body/#root) are set in MUI CssBaseline (theme).
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

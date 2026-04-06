@@ -1,0 +1,17 @@
+// Design tokens as CSS custom properties (for SCSS modules and plain CSS).
+// Keep values aligned with src/theme/tokens.ts (colorTokens).
+
+:root {
+  --navy: #002654;
+  --navy-muted: #94a8c4;
+  --accent: #1890ff;
+  --page: #f0f2f5;
+  --border: #d9d9d9;
+  --label: #4a4a4a;
+  --header-bg: #ffffff;
+  --sublabel: #7a8aa0;
+  --slate-muted: #3d4d63;
+  --sidebar-active-bg: #1e3f86;
+  --sidebar-divider: rgba(255, 255, 255, 0.12);
+  --badge: #e53935;
+}

@@ -1,0 +1,167 @@
+.container {
+  // margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  // gap: 0.5rem;
+}
+
+.header {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--navy-muted);
+  margin: 0;
+}
+
+.searchBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+  }
+}
+
+.searchInput {
+  flex: 1;
+
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 0.25rem;
+    background-color: #fff;
+  }
+}
+
+.searchButton {
+  flex-shrink: 0;
+  padding: 10px 1.5rem;
+  border-radius: 0.25rem;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  background-color: #1d2636 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+
+  &:hover {
+    background-color: #141a26 !important;
+    box-shadow: none !important;
+  }
+}
+
+.resultsList {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  max-height: 280px;
+  overflow: auto;
+  background-color: #fff;
+}
+
+.noResults {
+  padding: 0.5rem;
+  color: var(--sublabel);
+  font-size: 0.875rem;
+}
+
+.listItem {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.listItemAvatar {
+  min-width: 56px;
+}
+
+.selectedTravelersContainer {
+  padding-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  // gap: 1.5rem;
+}
+
+// SelectedTravelerCard styles
+.selectedCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  background-color: var(--page);
+}
+
+.selectedCardContent {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.selectedCardText {
+  min-width: 0;
+}
+
+.selectedCardName {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+  line-height: 1.3;
+}
+
+.selectedCardSubtitle {
+  margin-top: 0.25rem;
+  color: var(--sublabel);
+  font-size: 0.8125rem;
+}
+
+.selectedCardRemoveBtn {
+  color: var(--slate-muted);
+
+  &:hover {
+    color: var(--navy-muted);
+  }
+}
+
+// Avatar styles
+.avatar {
+  width: 48px;
+  height: 48px;
+  background-color: var(--accent) !important;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.smallAvatar {
+  width: 40px;
+  height: 40px;
+  background-color: var(--accent) !important;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: #fff;
+}
+
+// Typography styles
+.travelerName {
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+}
+
+.travelerSubtitle {
+  font-size: 0.8125rem;
+  color: var(--sublabel);
+}
+
+.searchInputIcon {
+  color: var(--slate-muted);
+}

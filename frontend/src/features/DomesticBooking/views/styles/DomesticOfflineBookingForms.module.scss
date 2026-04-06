@@ -1,0 +1,248 @@
+// JR / offline transport
+.emptyState {
+  padding: 24px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.jrRoot {
+  margin: 16px;
+}
+
+.jrNotice {
+  padding: 12px 16px;
+  background-color: #fffaf3;
+  border-radius: 8px;
+  border: 1px solid #edf1f7;
+}
+
+.jrNoticeText {
+  font-size: 14px;
+  color: #334155;
+}
+
+.jrFormSection {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5b6b83;
+}
+
+.formRow {
+  padding-block: 16px;
+}
+
+.radioGroupRow {
+  gap: 24px;
+}
+
+.gridArrowCell {
+  text-align: center;
+}
+
+.mutedArrow {
+  color: #94a3b8;
+}
+
+.legLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.remarksHelper {
+  margin-top: 12px;
+  font-size: 13px;
+  font-style: italic;
+  color: #64748b;
+}
+
+.remarksHelperTight {
+  margin-top: 6px;
+  font-size: 13px;
+  font-style: italic;
+  color: #64748b;
+}
+
+// Hotel
+.hotelPaper {
+  border: 1px solid #edf1f7;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.hotelInner {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.hotelRow {
+  padding-block: 14px;
+  border-bottom: 1px solid #f2f5fa;
+}
+
+.hotelRowLast {
+  padding-block: 14px;
+}
+
+.hotelFieldLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.2px;
+}
+
+.dateTilde {
+  margin-top: 20px;
+  color: #c3cfdd;
+  font-weight: 700;
+}
+
+.hotelTextField {
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  :global(.MuiOutlinedInput-input::placeholder) {
+    color: #9aa7ba;
+    opacity: 1;
+  }
+}
+
+.hotelPreferenceLabel {
+  margin: 0;
+
+  :global(.MuiFormControlLabel-label) {
+    font-weight: 700;
+    color: #1f2f46;
+  }
+}
+
+.budgetFieldMin {
+  width: 120px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+}
+
+.budgetTilde {
+  color: #c3cfdd;
+  font-weight: 700;
+}
+
+.budgetFieldMax {
+  width: 150px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  :global(.MuiOutlinedInput-input::placeholder) {
+    color: #9aa7ba;
+    opacity: 1;
+  }
+}
+
+.currencyYen {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.selectNarrow {
+  width: 160px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+}
+
+.selectRoomCount {
+  width: 72px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+}
+
+.roomCountSuffix {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8fa0b4;
+}
+
+.selectRoomType {
+  width: 180px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 40px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+}
+
+.hotelRemarksField {
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  :global(.MuiOutlinedInput-input::placeholder) {
+    color: #9aa7ba;
+    opacity: 1;
+  }
+}
+
+.hotelRemarksHint {
+  margin-top: 8px;
+  font-size: 13px;
+  font-style: italic;
+  color: #6b7b93;
+  font-weight: 600;
+}
+
+.hotelActions {
+  padding: 14px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f2f5fa;
+}
+
+.buttonClear:global(.MuiButton-root) {
+  min-width: 88px;
+  height: 38px;
+  border-color: #e4ebf5;
+  color: #5f728c;
+  text-transform: none;
+  font-weight: 700;
+}
+
+.buttonSubmit:global(.MuiButton-root) {
+  min-width: 176px;
+  height: 38px;
+  text-transform: none;
+  font-weight: 700;
+  box-shadow: none;
+  background-color: #2f80ed;
+
+  &:hover {
+    background-color: #1f6ed8;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,55 @@
+.title {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 20px;
+ 
+  font-weight: 600;
+
+  .MuiTypography-root {
+    font-size: 8px;
+  }
+}
+
+.tabBar {
+  background: var(--page);
+  border-radius:1rem ;
+  padding: 0.25rem;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+  display: flex;
+  justify-content: center;
+}
+
+.tabBar :global(.MuiTab-root.Mui-selected) {
+  color: #ffffff !important;
+  background-color: #2563eb !important;
+  border-radius: 1rem;
+}
+
+.tabFlexContainer {
+  justify-content: center;
+}
+
+.tabItem {
+  text-transform: none;
+  min-width: 140px;
+  font-weight: 700;
+  border-radius: 999px;
+  color: #475569;
+  background: transparent;
+  margin: 0 0.25rem;
+}
+
+.tabItem:hover {
+  border-radius: 1rem;
+  background: #e2e8f0;
+}
+
+.tabItemActive {
+  color: #fff;
+  background: #3b82f6;
+}
+
+.tabItemActive:hover {
+  padding: auto;
+  border-radius: 16px;
+  background: #2563eb;
+}
