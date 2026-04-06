@@ -1,0 +1,112 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: "22"
+  DEPLOY_ROOT: /opt/bcd-btos-pos
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # ── Build backend ──
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Build backend
+        run: npm run build
+        working-directory: backend
+
+      # ── Build frontend ──
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      # ── Deploy to EC2 ──
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: >-
+            backend/dist/,
+            backend/package.json,
+            backend/package-lock.json,
+            backend/.env.example,
+            frontend/dist/,
+            deploy/ec2/ecosystem.config.cjs,
+            deploy/ec2/nginx-bcd-btos-pos.conf,
+            deploy/ec2/setup-server.sh
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 0
+          overwrite: true
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            export DEPLOY_ROOT=${{ env.DEPLOY_ROOT }}
+
+            # Install production-only backend dependencies
+            cd $DEPLOY_ROOT/backend
+            npm ci --omit=dev
+
+            # Create .env from example if it doesn't exist
+            if [ ! -f .env ]; then
+              cp .env.example .env
+              sed -i 's/NODE_ENV=development/NODE_ENV=production/' .env
+              echo "Created .env from .env.example — edit JAL credentials on server"
+            fi
+
+            # Ensure nginx is configured
+            if [ ! -f /etc/nginx/sites-enabled/bcd-btos-pos ]; then
+              sudo cp $DEPLOY_ROOT/deploy/ec2/nginx-bcd-btos-pos.conf /etc/nginx/sites-available/bcd-btos-pos
+              sudo sed -i 's/YOUR_SERVER_NAME/_/g' /etc/nginx/sites-available/bcd-btos-pos
+              sudo ln -sf /etc/nginx/sites-available/bcd-btos-pos /etc/nginx/sites-enabled/
+              sudo rm -f /etc/nginx/sites-enabled/default
+              sudo nginx -t && sudo systemctl reload nginx
+            else
+              sudo nginx -t && sudo systemctl reload nginx
+            fi
+
+            # Restart API via PM2
+            cd $DEPLOY_ROOT
+            export DEPLOY_ROOT
+            pm2 delete bcd-japan-integration-service 2>/dev/null || true
+            pm2 start $DEPLOY_ROOT/deploy/ec2/ecosystem.config.cjs
+            pm2 save
+
+            # Health check (retry up to 10 seconds)
+            for i in $(seq 1 10); do
+              if curl -sf http://localhost:3004/health > /dev/null 2>&1; then
+                echo "Health check passed"
+                exit 0
+              fi
+              sleep 1
+            done
+            echo "Health check failed after 10s"
+            pm2 logs bcd-japan-integration-service --lines 20 --nostream
+            exit 1

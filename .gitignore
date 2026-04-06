@@ -1,0 +1,14 @@
+# Never commit private keys or secrets
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+
+# Local-only deploy material (keep README tracked)
+deploy/secrets/*
+!deploy/secrets/README.txt
+
+# Build output
+node_modules/
+dist/
