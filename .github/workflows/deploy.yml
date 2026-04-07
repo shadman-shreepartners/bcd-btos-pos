@@ -66,13 +66,14 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
+          script_stop: false
           script: |
+            set -e
             export DEPLOY_ROOT=${{ env.DEPLOY_ROOT }}
 
             # Install production-only backend dependencies
             cd $DEPLOY_ROOT/backend
-            npm ci --omit=dev
+            npm ci --omit=dev --no-audit
 
             # Create .env from example if it doesn't exist
             if [ ! -f .env ]; then
