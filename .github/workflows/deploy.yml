@@ -93,6 +93,10 @@ jobs:
               sudo nginx -t && sudo systemctl reload nginx
             fi
 
+            # Fix permissions so nginx (www-data) can read frontend dist
+            chmod -R o+rx $DEPLOY_ROOT/frontend/dist
+            chmod o+x $DEPLOY_ROOT $DEPLOY_ROOT/frontend
+
             # Restart API via PM2
             cd $DEPLOY_ROOT
             export DEPLOY_ROOT
