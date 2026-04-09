@@ -47,14 +47,14 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: >-
-            backend/dist/,
-            backend/package.json,
-            backend/package-lock.json,
-            backend/.env.example,
-            frontend/dist/,
-            deploy/ec2/ecosystem.config.cjs,
-            deploy/ec2/nginx-bcd-btos-pos.conf,
+          source: |
+            backend/dist/
+            backend/package.json
+            backend/package-lock.json
+            backend/.env.example
+            frontend/dist/
+            deploy/ec2/ecosystem.config.cjs
+            deploy/ec2/nginx-bcd-btos-pos.conf
             deploy/ec2/setup-server.sh
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 0
@@ -66,7 +66,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: false
+          script_stop: true
           script: |
             set -e
             export DEPLOY_ROOT=${{ env.DEPLOY_ROOT }}
@@ -75,12 +75,20 @@ jobs:
             cd $DEPLOY_ROOT/backend
             npm ci --omit=dev --no-audit
 
-            # Create .env from example if it doesn't exist
-            if [ ! -f .env ]; then
-              cp .env.example .env
-              sed -i 's/NODE_ENV=development/NODE_ENV=production/' .env
-              echo "Created .env from .env.example — edit JAL credentials on server"
-            fi
+            # Write real .env from GitHub Secrets (overwrites placeholder .env.example values)
+            cat > .env <<'EOF'
+            NODE_ENV=production
+            PORT=3004
+            JAL_SSO_URL=${{ secrets.JAL_SSO_URL }}
+            JAL_SEAMLESS_ID=${{ secrets.JAL_SEAMLESS_ID }}
+            JAL_ACCESS_CODE=${{ secrets.JAL_ACCESS_CODE }}
+            JAL_ACUD_ID=${{ secrets.JAL_ACUD_ID }}
+            JAL_ACUD_PASSWORD=${{ secrets.JAL_ACUD_PASSWORD }}
+            JAL_SOAP_WSDL_URL=${{ secrets.JAL_SOAP_WSDL_URL }}
+            JAL_SOAP_CORPORATE_ID=${{ secrets.JAL_SOAP_CORPORATE_ID }}
+            JAL_SOAP_BASIC_USER=${{ secrets.JAL_SOAP_BASIC_USER }}
+            JAL_SOAP_BASIC_PASSWORD=${{ secrets.JAL_SOAP_BASIC_PASSWORD }}
+            EOF
 
             # Ensure nginx is configured
             if [ ! -f /etc/nginx/sites-enabled/bcd-btos-pos ]; then

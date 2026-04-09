@@ -76,11 +76,20 @@ Every push to `main` triggers `.github/workflows/deploy.yml` which builds both a
 
 Go to **GitHub repo > Settings > Secrets and variables > Actions > New repository secret** and add:
 
-| Secret name    | Value                                            |
-|----------------|--------------------------------------------------|
-| `EC2_SSH_KEY`  | Full contents of `deploy/secrets/chetan-ims.pem` |
-| `EC2_HOST`     | Your EC2 public DNS (e.g. `ec2-52-7-187-197.compute-1.amazonaws.com`) |
-| `EC2_USER`     | `ubuntu`                                         |
+| Secret name              | Value                                            |
+|--------------------------|--------------------------------------------------|
+| `EC2_SSH_KEY`            | Full contents of `deploy/secrets/chetan-ims.pem` |
+| `EC2_HOST`               | Your EC2 public DNS (e.g. `ec2-52-7-187-197.compute-1.amazonaws.com`) |
+| `EC2_USER`               | `ubuntu`                                         |
+| `JAL_SSO_URL`            | JAL SSO endpoint URL                            |
+| `JAL_SEAMLESS_ID`        | JAL seamless ID credential                      |
+| `JAL_ACCESS_CODE`        | JAL access code credential                      |
+| `JAL_ACUD_ID`            | JAL ACUD ID credential                          |
+| `JAL_ACUD_PASSWORD`      | JAL ACUD password credential                    |
+| `JAL_SOAP_WSDL_URL`      | JAL SOAP WSDL URL                               |
+| `JAL_SOAP_CORPORATE_ID`  | Corporate ID for SOAP `in0`                     |
+| `JAL_SOAP_BASIC_USER`    | (Optional) HTTP Basic auth username             |
+| `JAL_SOAP_BASIC_PASSWORD`| (Optional) HTTP Basic auth password             |
 
 ### What the workflow does
 
