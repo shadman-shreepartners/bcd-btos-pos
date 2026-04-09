@@ -65,13 +65,38 @@ export class JalSoapClient {
     };
 
     this.logger.info(
-      { projectNumber, operation: asyncName, corporateId, jstTimestamp: in1 },
+      { projectNumber, operation: asyncName, jstTimestamp: in1 },
       'Calling JAL SOAP retrieve',
     );
 
+    const timeoutMs = this.configService.get<number>(
+      'JAL_SOAP_TIMEOUT_MS',
+      30_000,
+    );
+
     try {
-      const tuple = await (fn as AsyncSoapMethod).call(this.client, payload);
+      const tuple = await Promise.race([
+        (fn as AsyncSoapMethod).call(this.client, payload),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(`JAL SOAP request timed out after ${timeoutMs}ms`),
+              ),
+            timeoutMs,
+          ),
+        ),
+      ]);
       const [body] = tuple;
+
+      if (body == null || typeof body !== 'object') {
+        this.logger.warn(
+          { projectNumber, bodyType: typeof body },
+          'JAL SOAP returned non-object body',
+        );
+        return null;
+      }
+
       return body;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

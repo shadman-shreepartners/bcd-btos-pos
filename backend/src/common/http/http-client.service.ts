@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   ProviderTimeoutException,
@@ -25,7 +26,10 @@ const DEFAULT_RETRY_DELAYS = [500, 1000, 2000];
  */
 @Injectable()
 export class HttpClientService {
-  private readonly logger = new Logger(HttpClientService.name);
+  constructor(
+    @InjectPinoLogger(HttpClientService.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
   async request<T>(
     config: AxiosRequestConfig,

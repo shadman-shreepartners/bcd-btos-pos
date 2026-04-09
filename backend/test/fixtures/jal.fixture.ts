@@ -14,6 +14,10 @@ export const JAL_CONFIG_ENV: Record<string, string> = {
   JAL_ACCESS_CODE: JAL_CONFIG.accessCode,
   JAL_ACUD_ID: JAL_CONFIG.acudId,
   JAL_ACUD_PASSWORD: JAL_CONFIG.acudPassword,
+  // SOAP — needed by env.validation's zod schema at module init
+  JAL_SOAP_WSDL_URL: 'https://example.com/jal-mock.wsdl',
+  JAL_SOAP_CORPORATE_ID: 'C0050874',
+  JAL_SOAP_TIMEOUT_MS: '30000',
 };
 
 export const validSsoRequest: JalSsoRequestDto = {

@@ -12,3 +12,4 @@ deploy/secrets/*
 # Build output
 node_modules/
 dist/
+/backend/guides

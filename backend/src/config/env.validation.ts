@@ -28,6 +28,8 @@ export const envSchema = z
       .trim()
       .min(1)
       .default('getRecordDetailFromProject'),
+    /** SOAP HTTP request timeout in milliseconds (default: 30 000 ms) */
+    JAL_SOAP_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
   })
   .refine(
     (env) =>

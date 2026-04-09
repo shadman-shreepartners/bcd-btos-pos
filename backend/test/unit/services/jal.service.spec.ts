@@ -1,31 +1,27 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JalService } from '../../../src/modules/integrations/jal/jal.service';
 import { JalSoapClient } from '../../../src/modules/integrations/jal/jal-soap.client';
-//import { JalRetrieveResponseDto } from '../../../src/modules/integrations/jal/dto/jal-retrieve-response.dto';
 import {
   configServiceMock,
   mockGetOrThrow,
   resetMockGetOrThrow,
-} from '../../../test/mocks/config-service.mock';
-import { pinoLoggerMock } from '../../../test/mocks/pino-logger.mock';
+} from '../../mocks/config-service.mock';
+import { pinoLoggerMock } from '../../mocks/pino-logger.mock';
 import {
   validSsoRequest,
   minimalSsoRequest,
   fullSsoRequest,
   specialCharsRequest,
   JAL_CONFIG_KEYS,
-} from '../../../test/fixtures/jal.fixture';
+} from '../../fixtures/jal.fixture';
+
+const mockRetrieveByProjectNumber = jest.fn();
 
 describe('JalService', () => {
   let service: JalService;
-  const retrieveByProjectNumber: jest.MockedFunction<
-    JalSoapClient['retrieveByProjectNumber']
-  > = jest.fn();
 
   beforeEach(async () => {
-    retrieveByProjectNumber.mockReset();
     resetMockGetOrThrow();
 
     const module = await Test.createTestingModule({
@@ -34,16 +30,15 @@ describe('JalService', () => {
         { provide: ConfigService, useFactory: configServiceMock },
         {
           provide: JalSoapClient,
-          useValue: { retrieveByProjectNumber } satisfies Pick<
-            JalSoapClient,
-            'retrieveByProjectNumber'
-          >,
+          useValue: {
+            retrieveByProjectNumber: mockRetrieveByProjectNumber,
+          },
         },
         pinoLoggerMock(JalService.name),
       ],
     }).compile();
 
-    service = module.get<JalService>(JalService);
+    service = module.get(JalService);
   });
 
   describe('buildSsoPayload', () => {
@@ -62,7 +57,6 @@ describe('JalService', () => {
     });
 
     it('should read all 5 config values via getOrThrow', () => {
-      mockGetOrThrow.mockClear();
       service.buildSsoPayload(validSsoRequest);
 
       expect(mockGetOrThrow).toHaveBeenCalledWith('JAL_SSO_URL');
@@ -73,7 +67,7 @@ describe('JalService', () => {
     });
 
     it('should throw when config value is missing', () => {
-      mockGetOrThrow.mockImplementation((): never => {
+      mockGetOrThrow.mockImplementation(() => {
         throw new Error('Missing config');
       });
 
@@ -112,10 +106,10 @@ describe('JalService', () => {
       expect(result.fields.prmFirstName).toBe('太郎');
     });
 
-    it.each([...JAL_CONFIG_KEYS])(
+    it.each(JAL_CONFIG_KEYS)(
       'should throw when %s config key is missing',
-      (missingKey: string) => {
-        mockGetOrThrow.mockImplementation((key: string): string => {
+      (missingKey) => {
+        mockGetOrThrow.mockImplementation((key: string) => {
           if (key === missingKey) {
             throw new Error(`Missing config: ${missingKey}`);
           }
@@ -129,32 +123,57 @@ describe('JalService', () => {
     );
   });
 
-  // TODO: Add tests for retrieveBooking
-  /*describe('retrieveBooking', () => {
-    it('should map SOAP result via jalSoapClient', async () => {
-      retrieveByProjectNumber.mockResolvedValue({
-        ReservationInfo: {
-          ProjectNumber: 'PN-UNIT',
-          PassengerInfo: { prmSurName: 'SATO' },
+  describe('retrieveBooking', () => {
+    it('should call SOAP client and return mapped DTO', async () => {
+      const soapBody = {
+        getRecordDetailFromProjectReturn: {
+          ReservationInfo: {
+            projectNumber: 'M5555J260300050',
+            PassengerInfo: {
+              lastNameRomaji: 'TANAKA',
+              firstNameRomaji: 'TARO',
+              FlightInfo: { flightNumber: 'JL123', departureCode: 'HND' },
+            },
+          },
         },
-      } as Awaited<ReturnType<JalSoapClient['retrieveByProjectNumber']>>);
+      };
+      mockRetrieveByProjectNumber.mockResolvedValue(soapBody);
 
-      const result: JalRetrieveResponseDto = await service.retrieveBooking({
-        projectNumber: 'PN-UNIT',
+      const result = await service.retrieveBooking({
+        projectNumber: 'M5555J260300050',
       });
 
-      expect(retrieveByProjectNumber).toHaveBeenCalledWith('PN-UNIT');
-      expect(result.projectNumber).toBe('PN-UNIT');
+      expect(mockRetrieveByProjectNumber).toHaveBeenCalledWith(
+        'M5555J260300050',
+      );
+      expect(result.projectNumber).toBe('M5555J260300050');
       expect(result.reservations).toHaveLength(1);
-      expect(result.reservations[0].passengers[0].surname).toBe('SATO');
+      expect(result.reservations[0].passengers[0].surname).toBe('TANAKA');
+      expect(result.reservations[0].passengers[0].flights[0].flightNumber).toBe(
+        'JL123',
+      );
     });
 
-    it('should propagate SOAP client failures', async () => {
-      retrieveByProjectNumber.mockRejectedValue(new Error('unavailable'));
+    it('should return empty reservations when SOAP returns null', async () => {
+      mockRetrieveByProjectNumber.mockResolvedValue(null);
+
+      const result = await service.retrieveBooking({
+        projectNumber: 'PN-EMPTY',
+      });
+
+      expect(result.projectNumber).toBe('PN-EMPTY');
+      expect(result.reservations).toEqual([]);
+    });
+
+    it('should propagate ServiceUnavailableException from SOAP client', async () => {
+      const { ServiceUnavailableException } = await import('@nestjs/common');
+      mockRetrieveByProjectNumber.mockRejectedValue(
+        new ServiceUnavailableException('JAL SOAP retrieve failed'),
+      );
 
       await expect(
         service.retrieveBooking({ projectNumber: 'PN-FAIL' }),
-      ).rejects.toThrow('unavailable');
+      ).rejects.toThrow(ServiceUnavailableException);
     });
-  });*/
+  });
 });

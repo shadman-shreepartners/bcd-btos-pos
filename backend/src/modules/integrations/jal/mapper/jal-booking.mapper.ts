@@ -12,65 +12,9 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
-function pickString(
-  obj: Record<string, unknown>,
-  keys: string[],
-): string | undefined {
-  for (const key of keys) {
-    const v = obj[key];
-    if (typeof v === 'string' && v.length > 0) return v;
-  }
-  return undefined;
-}
-
-function mapFlight(raw: unknown): JalRetrieveFlightDto {
-  const o = asRecord(raw) ?? {};
-  const f = new JalRetrieveFlightDto();
-  f.flightNumber = pickString(o, [
-    'flightNumber',
-    'FlightNumber',
-    'flightNo',
-    'FlightNo',
-  ]);
-  f.departureAirport = pickString(o, [
-    'departureCode',
-    'DepartureCode',
-    'departureAirport',
-    'DepartureAirport',
-    'depAirport',
-    'origin',
-  ]);
-  f.arrivalAirport = pickString(o, [
-    'arrivalCode',
-    'ArrivalCode',
-    'arrivalAirport',
-    'ArrivalAirport',
-    'arrAirport',
-    'destination',
-  ]);
-  f.departureTime = pickString(o, [
-    'departureTime',
-    'DepartureTime',
-    'depTime',
-  ]);
-  f.arrivalTime = pickString(o, ['arrivalTime', 'ArrivalTime', 'arrTime']);
-  f.boardingDate = pickString(o, ['boardingDate', 'BoardingDate']);
-  f.cabinClass = pickString(o, [
-    'reservationClassName',
-    'ReservationClassName',
-    'cabinClass',
-    'CabinClass',
-    'seatClass',
-    'class',
-  ]);
-  f.status = pickString(o, [
-    'reservationStatus',
-    'ReservationStatus',
-    'status',
-    'Status',
-  ]);
-  f.seatNumber = pickString(o, ['seatNumber', 'SeatNumber']);
-  return f;
+/** Coerce to string if value is a non-empty string, else undefined */
+function str(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 function firstArray(value: unknown): unknown[] {
@@ -79,92 +23,68 @@ function firstArray(value: unknown): unknown[] {
   return [];
 }
 
-function mapPassenger(raw: unknown): JalRetrievePassengerDto {
+/**
+ * Maps a single FlightInfo multiRef (id2) element.
+ * Field names are exact JAL SOAP response names per RetrieveProcedure WSDL.
+ */
+function mapFlight(raw: unknown): JalRetrieveFlightDto {
   const o = asRecord(raw) ?? {};
-  const p = new JalRetrievePassengerDto();
-  p.surname = pickString(o, [
-    'lastNameRomaji',
-    'LastNameRomaji',
-    'lastNameKanji',
-    'LastNameKanji',
-    'prmSurName',
-    'surname',
-    'Surname',
-    'lastName',
-    'LastName',
-  ]);
-  p.givenName = pickString(o, [
-    'firstNameRomaji',
-    'FirstNameRomaji',
-    'firstNameKanji',
-    'FirstNameKanji',
-    'prmFirstName',
-    'givenName',
-    'GivenName',
-    'firstName',
-  ]);
-  p.jmbNumber = pickString(o, ['jmbNumber', 'JmbNumber', 'JMBNumber']);
-  p.fare = pickString(o, ['passengerFare', 'PassengerFare', 'fare', 'Fare']);
-  p.ticketingDeadline = pickString(o, [
-    'issuePeriodMsg',
-    'IssuePeriodMsg',
-    'ticketingDeadline',
-    'TicketingDeadline',
-    'ticketTimeLimit',
-  ]);
-
-  const flightRaw =
-    o.FlightInfo ?? o.flightInfo ?? o.flights ?? o.Flights ?? o.FlightInfos;
-  p.flights = firstArray(flightRaw).map((x) => mapFlight(x));
-
-  return p;
-}
-
-function mapReservation(raw: unknown): JalRetrieveReservationDto {
-  const o = asRecord(raw) ?? {};
-  const r = new JalRetrieveReservationDto();
-  r.projectNumber = pickString(o, [
-    'projectNumber',
-    'ProjectNumber',
-    'projectnumber',
-    'ProjectNo',
-  ]);
-  r.masterPnrNumber = pickString(o, [
-    'masterPNRNumber',
-    'MasterPNRNumber',
-    'masterPnrNumber',
-  ]);
-  r.pnrNumber = pickString(o, ['PNRNumber', 'pnrNumber', 'PnrNumber']);
-  r.fareTotal = pickString(o, ['fareTotal', 'FareTotal']);
-  r.errorCode = pickString(o, ['errorCode', 'ErrorCode']);
-  r.errorMessage = pickString(o, ['errorMessage', 'ErrorMessage']);
-
-  const paxRaw =
-    o.PassengerInfo ?? o.passengerInfo ?? o.passengers ?? o.Passengers;
-  r.passengers = firstArray(paxRaw).map((x) => mapPassenger(x));
-
-  return r;
-}
-
-/** First element of parsed SOAP response — strips `*Return` wrapper when present */
-function unwrapSoapReturnBody(raw: unknown): unknown {
-  const o = asRecord(raw);
-  if (!o) return raw;
-  return (
-    o.getRecordDetailFromProjectReturn ??
-    o.getRecordDetailFromPNRNumberReturn ??
-    o.getRecordDetailFromJMBNumberReturn ??
-    o.getRecordDetailFromProjectAndPNRReturn ??
-    o.getRecordDetailFromProjectAndJMBReturn ??
-    o.getRecordDetailFromJMBAndPNRReturn ??
-    o.getRecordDetailReturn ??
-    raw
-  );
+  const f = new JalRetrieveFlightDto();
+  f.flightNumber = str(o.flightNumber);
+  f.departureAirport = str(o.departureCode);
+  f.arrivalAirport = str(o.arrivalCode);
+  f.departureTime = str(o.departureTime);
+  f.arrivalTime = str(o.arrivalTime);
+  f.boardingDate = str(o.boardingDate);
+  f.cabinClass = str(o.reservationClassName);
+  f.status = str(o.reservationStatus);
+  f.seatNumber = str(o.seatNumber);
+  return f;
 }
 
 /**
- * Maps a loosely-typed SOAP result object into our API DTO.
- * JAL WSDL element names may differ; this normalizes common variants.
+ * Maps a single PassengerInfo multiRef (id1) element.
+ * Field names are exact JAL SOAP response names per RetrieveProcedure WSDL.
+ */
+function mapPassenger(raw: unknown): JalRetrievePassengerDto {
+  const o = asRecord(raw) ?? {};
+  const p = new JalRetrievePassengerDto();
+  p.surname = str(o.lastNameRomaji);
+  p.givenName = str(o.firstNameRomaji);
+  p.jmbNumber = str(o.jmbNumber);
+  p.fare = str(o.passengerFare);
+  p.ticketingDeadline = str(o.issuePeriodMsg);
+  p.flights = firstArray(o.FlightInfo).map((x) => mapFlight(x));
+  return p;
+}
+
+/**
+ * Maps a single ReservationInfo multiRef (id0) element.
+ * Field names are exact JAL SOAP response names per RetrieveProcedure WSDL.
+ */
+function mapReservation(raw: unknown): JalRetrieveReservationDto {
+  const o = asRecord(raw) ?? {};
+  const r = new JalRetrieveReservationDto();
+  r.projectNumber = str(o.projectNumber);
+  r.masterPnrNumber = str(o.masterPNRNumber);
+  r.pnrNumber = str(o.PNRNumber);
+  r.fareTotal = str(o.fareTotal);
+  r.errorCode = str(o.errorCode);
+  r.errorMessage = str(o.errorMessage);
+  r.passengers = firstArray(o.PassengerInfo).map((x) => mapPassenger(x));
+  return r;
+}
+
+/** Strips the `getRecordDetailFromProjectReturn` wrapper when present */
+function unwrapSoapReturnBody(raw: unknown): unknown {
+  const o = asRecord(raw);
+  if (!o) return raw;
+  return o.getRecordDetailFromProjectReturn ?? raw;
+}
+
+/**
+ * Maps a JAL RetrieveProcedure SOAP result into our API DTO.
+ * Uses exact field names from JAL's WSDL multiRef response structure.
  */
 export function mapSoapToJalRetrieveResponse(
   raw: unknown,
@@ -180,14 +100,7 @@ export function mapSoapToJalRetrieveResponse(
 
   const unwrapped = unwrapSoapReturnBody(raw);
   const root = asRecord(unwrapped) ?? {};
-  const resRaw =
-    root.ReservationInfo ??
-    root.reservationInfo ??
-    root.Reservations ??
-    root.reservations ??
-    root.result ??
-    root.Result ??
-    unwrapped;
+  const resRaw = root.ReservationInfo ?? unwrapped;
 
   const list = firstArray(resRaw);
   dto.reservations = list.map((item) => mapReservation(item));

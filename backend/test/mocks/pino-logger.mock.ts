@@ -1,8 +1,6 @@
-import { jest } from '@jest/globals';
 import { Provider } from '@nestjs/common';
 import { getLoggerToken, PinoLogger } from 'nestjs-pino';
 
-/** Token matches `nestjs-pino` `@InjectPinoLogger(context)` via `getLoggerToken`. */
 export const pinoLoggerMock = (context: string): Provider => ({
   provide: getLoggerToken(context),
   useValue: {
@@ -11,5 +9,5 @@ export const pinoLoggerMock = (context: string): Provider => ({
     error: jest.fn(),
     debug: jest.fn(),
     trace: jest.fn(),
-  } satisfies Partial<PinoLogger>,
+  } satisfies Partial<PinoLogger> as unknown as PinoLogger,
 });

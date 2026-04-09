@@ -1,80 +1,65 @@
-import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import * as request from 'supertest';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import request from 'supertest';
+import http from 'http';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { validate } from '../../src/config/env.validation';
 import { IntegrationsModule } from '../../src/modules/integrations/integrations.module';
-import { HttpClientModule } from '../../src/common/http/http-client.module';
 import { AppController } from '../../src/app.controller';
+import { JAL_CONFIG_ENV } from '../fixtures/jal.fixture';
 import { AppService } from '../../src/app.service';
 import { ResponseInterceptor } from '../../src/common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from '../../src/common/filter/http-exception.filter';
 import { JAL_SOAP_CLIENT } from '../../src/modules/integrations/jal/constants/jal-soap.constants';
-
-interface SsoFields {
-  id: string;
-  projectnumber?: string;
-  password?: string;
-  prmSurName?: string;
-  prmFirstName?: string;
-  sectionCode?: string;
-  issueable?: string;
-  returnurl?: string;
-}
-
-interface SsoResponse {
-  success: boolean;
-  data: {
-    targetUrl: string;
-    method: string;
-    contentType: string;
-    fields: SsoFields;
-  } | null;
-  message?: string;
-}
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { UniformResponse } from '../../src/common/interfaces/response';
 
 describe('JAL SSO (e2e)', () => {
-  let app: NestExpressApplication;
+  let app: INestApplication;
+  let server: http.Server;
 
   beforeAll(async () => {
-    process.env.JAL_SOAP_WSDL_URL ??= 'https://example.com/jal-mock.wsdl';
-    process.env.JAL_SOAP_CORPORATE_ID ??= 'C0050874';
+    // Inject test env vars so zod validate() sees them in process.env
+    Object.assign(process.env, {
+      PORT: '3004',
+      NODE_ENV: 'test',
+      ...JAL_CONFIG_ENV,
+    });
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
           validate,
-          envFilePath: '.env',
+          ignoreEnvFile: true,
         }),
         LoggerModule.forRoot({ pinoHttp: { level: 'silent' } }),
-        HttpClientModule,
         IntegrationsModule,
       ],
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        { provide: APP_FILTER, useClass: HttpExceptionFilter },
+        { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+        {
+          provide: APP_PIPE,
+          useValue: new ValidationPipe({
+            whitelist: true,
+            transform: true,
+            forbidNonWhitelisted: true,
+          }),
+        },
+      ],
     })
       .overrideProvider(JAL_SOAP_CLIENT)
-      .useValue({
-        getRecordDetailFromProjectAsync: jest.fn(),
-      })
+      .useValue({ getRecordDetailFromProjectAsync: jest.fn() })
       .compile();
 
-    app = moduleFixture.createNestApplication<NestExpressApplication>();
+    app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1', { exclude: ['health'] });
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
-    app.useGlobalInterceptors(new ResponseInterceptor());
-    app.useGlobalFilters(new HttpExceptionFilter());
     await app.init();
+    server = app.getHttpServer() as http.Server;
   });
 
   afterAll(async () => {
@@ -83,87 +68,92 @@ describe('JAL SSO (e2e)', () => {
 
   describe('POST /api/v1/integrations/jal/sso', () => {
     it('should return form fields in UniformResponse on valid request', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: 'XC0050870', projectNumber: 'M5555J260300050' })
         .expect(201)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse<Record<string, unknown>>;
           expect(body.success).toBe(true);
-          expect(body.data?.targetUrl).toBeDefined();
-          expect(body.data?.method).toBe('POST');
-          expect(body.data?.contentType).toBe(
-            'application/x-www-form-urlencoded',
-          );
-          expect(body.data?.fields).toBeDefined();
-          expect(body.data?.fields.id).toBe('XC0050870');
-          expect(body.data?.fields.projectnumber).toBe('M5555J260300050');
+
+          const data = body.data as Record<string, unknown>;
+          expect(data.targetUrl).toBeDefined();
+          expect(data.method).toBe('POST');
+          expect(data.contentType).toBe('application/x-www-form-urlencoded');
+
+          const fields = data.fields as Record<string, unknown>;
+          expect(fields).toBeDefined();
+          expect(fields.id).toBe('XC0050870');
+          expect(fields.projectnumber).toBe('M5555J260300050');
         });
     });
 
     it('should return form fields with only required id', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: 'TESTUSER' })
         .expect(201)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse<Record<string, unknown>>;
           expect(body.success).toBe(true);
-          expect(body.data?.fields.id).toBe('TESTUSER');
+
+          const data = body.data as Record<string, unknown>;
+          const fields = data.fields as Record<string, unknown>;
+          expect(fields.id).toBe('TESTUSER');
         });
     });
 
     it('should return 400 on empty body', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({})
         .expect(400)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse;
           expect(body.success).toBe(false);
         });
     });
 
     it('should return 400 when id is missing', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ projectNumber: 'PROJ123' })
         .expect(400)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse;
           expect(body.success).toBe(false);
         });
     });
 
     it('should return 400 on unknown fields (forbidNonWhitelisted)', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: 'USER1', hackerField: 'malicious' })
         .expect(400)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse;
           expect(body.success).toBe(false);
         });
     });
 
     it('should return 400 when id is empty string', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: '' })
         .expect(400)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse;
           expect(body.success).toBe(false);
         });
     });
 
     it('should return consistent error shape on validation failure', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({})
         .expect(400)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse;
           expect(body).toEqual(
             expect.objectContaining({
               success: false,
@@ -175,7 +165,7 @@ describe('JAL SSO (e2e)', () => {
     });
 
     it('should return 201 with all optional fields provided', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({
           id: 'XC0050870',
@@ -188,27 +178,31 @@ describe('JAL SSO (e2e)', () => {
           returnUrl: 'https://btos.example.com/callback',
         })
         .expect(201)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse<Record<string, unknown>>;
           expect(body.success).toBe(true);
-          expect(body.data?.fields.prmSurName).toBe('TANAKA');
-          expect(body.data?.fields.prmFirstName).toBe('TARO');
-          expect(body.data?.fields.returnurl).toBe(
-            'https://btos.example.com/callback',
-          );
+
+          const data = body.data as Record<string, unknown>;
+          const fields = data.fields as Record<string, unknown>;
+          expect(fields.prmSurName).toBe('TANAKA');
+          expect(fields.prmFirstName).toBe('TARO');
+          expect(fields.returnurl).toBe('https://btos.example.com/callback');
         });
     });
 
     it('should handle special characters in field values', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: 'XC005&0870', prmSurName: '田中' })
         .expect(201)
-        .expect((res) => {
-          const body = res.body as SsoResponse;
+        .expect((res: request.Response) => {
+          const body = res.body as UniformResponse<Record<string, unknown>>;
           expect(body.success).toBe(true);
-          expect(body.data?.fields.id).toBe('XC005&0870');
-          expect(body.data?.fields.prmSurName).toBe('田中');
+
+          const data = body.data as Record<string, unknown>;
+          const fields = data.fields as Record<string, unknown>;
+          expect(fields.id).toBe('XC005&0870');
+          expect(fields.prmSurName).toBe('田中');
         });
     });
   });
