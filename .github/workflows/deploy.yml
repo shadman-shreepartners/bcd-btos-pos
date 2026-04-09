@@ -41,21 +41,23 @@ jobs:
         working-directory: frontend
 
       # ── Deploy to EC2 ──
+      - name: Verify build artifacts exist
+        run: |
+          set -e
+          echo "=== Backend ==="
+          ls -la backend/dist || (echo "ERROR: backend/dist not found" && exit 1)
+          echo "=== Frontend ==="
+          ls -la frontend/dist || (echo "ERROR: frontend/dist not found" && exit 1)
+          echo "=== Deploy configs ==="
+          ls -la deploy/ec2/ecosystem.config.cjs deploy/ec2/nginx-bcd-btos-pos.conf deploy/ec2/setup-server.sh
+
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: |
-            backend/dist/
-            backend/package.json
-            backend/package-lock.json
-            backend/.env.example
-            frontend/dist/
-            deploy/ec2/ecosystem.config.cjs
-            deploy/ec2/nginx-bcd-btos-pos.conf
-            deploy/ec2/setup-server.sh
+          source: "backend/dist/,backend/package.json,backend/package-lock.json,frontend/dist/,deploy/ec2/ecosystem.config.cjs,deploy/ec2/nginx-bcd-btos-pos.conf,deploy/ec2/setup-server.sh"
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 0
           overwrite: true
@@ -112,14 +114,23 @@ jobs:
             pm2 start $DEPLOY_ROOT/deploy/ec2/ecosystem.config.cjs
             pm2 save
 
-            # Health check (retry up to 10 seconds)
-            for i in $(seq 1 10); do
-              if curl -sf http://localhost:3004/health > /dev/null 2>&1; then
+            # Health check (retry up to 60 seconds)
+            echo "Checking health endpoint..."
+            for i in $(seq 1 60); do
+              if curl -fsS "http://127.0.0.1:${PORT:-3004}/health" >/dev/null 2>&1; then
                 echo "Health check passed"
                 exit 0
               fi
+
+              if [ $((i % 10)) -eq 0 ]; then
+                echo "Still waiting... ($i/60)"
+                pm2 status || true
+                ss -ltnp | grep ':3004' || true
+              fi
+
               sleep 1
             done
-            echo "Health check failed after 10s"
-            pm2 logs bcd-japan-integration-service --lines 20 --nostream
+
+            echo "Health check failed after 60s"
+            pm2 logs bcd-japan-integration-service --lines 200 --nostream || true
             exit 1
