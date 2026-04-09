@@ -12,9 +12,18 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
-/** Coerce to string if value is a non-empty string, else undefined */
+/**
+ * Coerce to string — handles both plain strings and
+ * SOAP `{ attributes: {...}, $value: "..." }` wrapper objects.
+ */
 function str(value: unknown): string | undefined {
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
+  if (typeof value === 'string') return value.length > 0 ? value : undefined;
+  if (value && typeof value === 'object') {
+    const v = (value as Record<string, unknown>).$value;
+    if (typeof v === 'string') return v.length > 0 ? v : undefined;
+    if (typeof v === 'number') return String(v);
+  }
+  return undefined;
 }
 
 function firstArray(value: unknown): unknown[] {
@@ -54,7 +63,8 @@ function mapPassenger(raw: unknown): JalRetrievePassengerDto {
   p.jmbNumber = str(o.jmbNumber);
   p.fare = str(o.passengerFare);
   p.ticketingDeadline = str(o.issuePeriodMsg);
-  p.flights = firstArray(o.FlightInfo).map((x) => mapFlight(x));
+  const flightContainer = asRecord(o.flightInfo ?? o.FlightInfo);
+  p.flights = firstArray(flightContainer?.item ?? o.flightInfo ?? o.FlightInfo).map((x) => mapFlight(x));
   return p;
 }
 
@@ -71,7 +81,8 @@ function mapReservation(raw: unknown): JalRetrieveReservationDto {
   r.fareTotal = str(o.fareTotal);
   r.errorCode = str(o.errorCode);
   r.errorMessage = str(o.errorMessage);
-  r.passengers = firstArray(o.PassengerInfo).map((x) => mapPassenger(x));
+  const passengerContainer = asRecord(o.passengerInfo ?? o.PassengerInfo);
+  r.passengers = firstArray(passengerContainer?.item ?? o.passengerInfo ?? o.PassengerInfo).map((x) => mapPassenger(x));
   return r;
 }
 
@@ -100,7 +111,8 @@ export function mapSoapToJalRetrieveResponse(
 
   const unwrapped = unwrapSoapReturnBody(raw);
   const root = asRecord(unwrapped) ?? {};
-  const resRaw = root.ReservationInfo ?? unwrapped;
+  // JAL returns reservations under .item (SOAP encoded array) or .ReservationInfo
+  const resRaw = root.item ?? root.ReservationInfo ?? unwrapped;
 
   const list = firstArray(resRaw);
   dto.reservations = list.map((item) => mapReservation(item));
