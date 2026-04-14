@@ -13,7 +13,11 @@ import { ResponseInterceptor } from '../../src/common/interceptors/response.inte
 import { HttpExceptionFilter } from '../../src/common/filter/http-exception.filter';
 import { JAL_SOAP_CLIENT } from '../../src/modules/integrations/jal/constants/jal-soap.constants';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { UniformResponse } from '../../src/common/interfaces/response';
+import { ApiResponse } from '../../src/common/interfaces/response';
+
+function asApiResponse<T>(value: unknown): ApiResponse<T> {
+  return value as ApiResponse<T>;
+}
 
 describe('JAL SSO (e2e)', () => {
   let app: INestApplication;
@@ -67,13 +71,13 @@ describe('JAL SSO (e2e)', () => {
   });
 
   describe('POST /api/v1/integrations/jal/sso', () => {
-    it('should return form fields in UniformResponse on valid request', () => {
+    it('should return form fields in ApiResponse on valid request', () => {
       return request(server)
         .post('/api/v1/integrations/jal/sso')
         .send({ id: 'XC0050870', projectNumber: 'M5555J260300050' })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse<Record<string, unknown>>;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
 
           const data = body.data as Record<string, unknown>;
@@ -94,7 +98,7 @@ describe('JAL SSO (e2e)', () => {
         .send({ id: 'TESTUSER' })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse<Record<string, unknown>>;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
 
           const data = body.data as Record<string, unknown>;
@@ -109,7 +113,7 @@ describe('JAL SSO (e2e)', () => {
         .send({})
         .expect(400)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(false);
         });
     });
@@ -120,7 +124,7 @@ describe('JAL SSO (e2e)', () => {
         .send({ projectNumber: 'PROJ123' })
         .expect(400)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(false);
         });
     });
@@ -131,7 +135,7 @@ describe('JAL SSO (e2e)', () => {
         .send({ id: 'USER1', hackerField: 'malicious' })
         .expect(400)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(false);
         });
     });
@@ -142,7 +146,7 @@ describe('JAL SSO (e2e)', () => {
         .send({ id: '' })
         .expect(400)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(false);
         });
     });
@@ -153,14 +157,18 @@ describe('JAL SSO (e2e)', () => {
         .send({})
         .expect(400)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body).toEqual(
             expect.objectContaining({
               success: false,
               data: null,
+              error: expect.objectContaining({
+                code: 'VALIDATION_FAILED',
+                status: 400,
+                title: 'Bad Request',
+              }),
             }),
           );
-          expect(body.message).toBeDefined();
         });
     });
 
@@ -179,7 +187,7 @@ describe('JAL SSO (e2e)', () => {
         })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse<Record<string, unknown>>;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
 
           const data = body.data as Record<string, unknown>;
@@ -196,7 +204,7 @@ describe('JAL SSO (e2e)', () => {
         .send({ id: 'XC005&0870', prmSurName: '田中' })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse<Record<string, unknown>>;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
 
           const data = body.data as Record<string, unknown>;

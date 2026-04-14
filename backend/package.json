@@ -23,11 +23,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "11.1.17",
+    "@nestjs/common": "11.1.18",
     "@nestjs/config": "4.0.2",
-    "@nestjs/core": "11.1.17",
-    "@nestjs/platform-express": "11.1.17",
-    "axios": "1.14.0",
+    "@nestjs/core": "11.1.18",
+    "@nestjs/platform-express": "11.1.18",
+    "axios": "1.15.0",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
     "nestjs-pino": "4.4.0",
@@ -43,7 +43,7 @@
     "@eslint/js": "9.12.0",
     "@nestjs/cli": "11.0.10",
     "@nestjs/schematics": "11.0.7",
-    "@nestjs/testing": "11.1.17",
+    "@nestjs/testing": "11.1.18",
     "@types/express": "5.0.0",
     "@types/jest": "29.5.14",
     "@types/node": "22.7.5",
@@ -57,31 +57,24 @@
     "pino-pretty": "13.0.0",
     "prettier": "3.3.3",
     "supertest": "7.0.0",
-    "ts-jest": "29.2.5",
+    "ts-jest": "29.4.5",
     "ts-node": "10.9.2",
     "typescript": "5.6.3",
     "typescript-eslint": "8.8.1"
   },
+  "overrides": {
+    "axios": "1.15.0"
+  },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
+    "moduleFileExtensions": ["js", "json", "ts"],
     "rootDir": ".",
-    "roots": [
-      "<rootDir>/test/unit"
-    ],
+    "roots": ["<rootDir>/test/unit"],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "setupFilesAfterEnv": [
-      "./test/setup.ts"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.(t|j)s"
-    ],
+    "setupFilesAfterEnv": ["./test/setup.ts"],
+    "collectCoverageFrom": ["src/**/*.(t|j)s"],
     "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }

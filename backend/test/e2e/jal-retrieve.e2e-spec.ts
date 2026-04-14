@@ -13,7 +13,11 @@ import { HttpExceptionFilter } from '../../src/common/filter/http-exception.filt
 import { JAL_SOAP_CLIENT } from '../../src/modules/integrations/jal/constants/jal-soap.constants';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { JAL_CONFIG_ENV } from '../fixtures/jal.fixture';
-import { UniformResponse } from '../../src/common/interfaces/response';
+import { ApiResponse } from '../../src/common/interfaces/response';
+
+function asApiResponse<T>(value: unknown): ApiResponse<T> {
+  return value as ApiResponse<T>;
+}
 
 describe('JAL Retrieve (e2e)', () => {
   let app: INestApplication;
@@ -73,7 +77,7 @@ describe('JAL Retrieve (e2e)', () => {
   });
 
   describe('POST /api/v1/integrations/jal/retrieve', () => {
-    it('should return mapped reservations in UniformResponse', async () => {
+    it('should return mapped reservations in ApiResponse', async () => {
       getRecordDetailFromProjectAsync.mockResolvedValue([
         {
           getRecordDetailFromProjectReturn: {
@@ -98,7 +102,7 @@ describe('JAL Retrieve (e2e)', () => {
         .send({ projectNumber: 'M5555J260300050' })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = res.body as UniformResponse<Record<string, unknown>>;
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
 
           const data = body.data as Record<string, unknown>;

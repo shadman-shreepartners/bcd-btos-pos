@@ -1,3 +1,9 @@
-// Export the interfaces and helper class
-export { UniformResponse, PaginationMeta } from './response.interface';
+export {
+  ApiProblem,
+  ApiResponse,
+  ErrorCode,
+  ErrorResponse,
+  PaginationMeta,
+  SuccessResponse,
+} from './response.interface';
 export { ResponseHelper } from './response.helper';

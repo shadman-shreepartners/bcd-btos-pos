@@ -64,7 +64,9 @@ function mapPassenger(raw: unknown): JalRetrievePassengerDto {
   p.fare = str(o.passengerFare);
   p.ticketingDeadline = str(o.issuePeriodMsg);
   const flightContainer = asRecord(o.flightInfo ?? o.FlightInfo);
-  p.flights = firstArray(flightContainer?.item ?? o.flightInfo ?? o.FlightInfo).map((x) => mapFlight(x));
+  p.flights = firstArray(
+    flightContainer?.item ?? o.flightInfo ?? o.FlightInfo,
+  ).map((x) => mapFlight(x));
   return p;
 }
 
@@ -82,7 +84,9 @@ function mapReservation(raw: unknown): JalRetrieveReservationDto {
   r.errorCode = str(o.errorCode);
   r.errorMessage = str(o.errorMessage);
   const passengerContainer = asRecord(o.passengerInfo ?? o.PassengerInfo);
-  r.passengers = firstArray(passengerContainer?.item ?? o.passengerInfo ?? o.PassengerInfo).map((x) => mapPassenger(x));
+  r.passengers = firstArray(
+    passengerContainer?.item ?? o.passengerInfo ?? o.PassengerInfo,
+  ).map((x) => mapPassenger(x));
   return r;
 }
 

@@ -5,22 +5,22 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, map } from 'rxjs';
-import { ResponseHelper, UniformResponse } from '../interfaces/response';
+import { ApiResponse, ResponseHelper } from '../interfaces/response';
 
 /**
- * Auto-wraps all successful controller responses in UniformResponse envelope.
- * Registered globally in main.ts. Errors are handled by HttpExceptionFilter.
+ * Auto-wraps successful controller responses in API success envelope.
+ * Registered in AppModule via APP_INTERCEPTOR token (DI-based). Errors are handled by HttpExceptionFilter.
  */
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<UniformResponse<unknown>> {
+  ): Observable<ApiResponse<unknown>> {
     return next.handle().pipe(
       map((data: unknown) => {
-        // Avoid double-wrapping if controller already returned UniformResponse
-        if (this.isUniformResponse(data)) {
+        // Avoid double-wrapping if controller already returned API response
+        if (this.isApiResponse(data)) {
           return data;
         }
         return ResponseHelper.success(data);
@@ -28,15 +28,16 @@ export class ResponseInterceptor implements NestInterceptor {
     );
   }
 
-  // Type guard — checks all 4 required UniformResponse fields
-  private isUniformResponse(data: unknown): data is UniformResponse {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      'success' in data &&
-      'message' in data &&
-      'meta' in data &&
-      'data' in data
-    );
+  // Type guard — checks required API response fields.
+  private isApiResponse(data: unknown): data is ApiResponse<unknown> {
+    if (typeof data !== 'object' || data === null || !('success' in data)) {
+      return false;
+    }
+
+    if ((data as { success: boolean }).success === true) {
+      return 'message' in data && 'data' in data;
+    }
+
+    return 'error' in data && 'data' in data && 'meta' in data;
   }
 }

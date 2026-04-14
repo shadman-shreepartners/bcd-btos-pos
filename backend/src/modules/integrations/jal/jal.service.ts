@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { JalSsoRequestDto } from './dto/jal-sso-request.dto';
@@ -56,20 +61,57 @@ export class JalService {
       'JAL retrieve booking requested',
     );
 
-    const raw = await this.jalSoapClient.retrieveByProjectNumber(
-      request.projectNumber,
-    );
-    const data = mapSoapToJalRetrieveResponse(raw, request.projectNumber);
+    // Validate input
+    if (!request.projectNumber) {
+      throw new BadRequestException('Project number is required');
+    }
 
-    this.logger.info(
-      {
-        projectNumber: request.projectNumber,
-        reservationCount: data.reservations.length,
-        action: 'retrieveBooking',
-      },
-      'JAL retrieve booking completed',
-    );
+    try {
+      const raw = await this.jalSoapClient.retrieveByProjectNumber(
+        request.projectNumber,
+      );
 
-    return data;
+      const data = mapSoapToJalRetrieveResponse(raw, request.projectNumber);
+
+      // Check for business not-found scenario (e.g., SZ15)
+      const firstErrorCode = data.reservations[0]?.errorCode;
+      if (firstErrorCode === 'SZ15') {
+        this.logger.warn(
+          {
+            projectNumber: request.projectNumber,
+            jalErrorCode: firstErrorCode,
+          },
+          'JAL returned booking-not-found (SZ15)',
+        );
+        throw new NotFoundException('Booking not found');
+      }
+
+      this.logger.info(
+        {
+          projectNumber: request.projectNumber,
+          reservationCount: data.reservations.length,
+          action: 'retrieveBooking',
+        },
+        'JAL retrieve booking completed',
+      );
+
+      return data;
+    } catch (error) {
+      // Re-throw business exceptions (404, 400) as-is
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // All other errors are upstream/SOAP/network failures -> 503
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        { projectNumber: request.projectNumber, error: message },
+        'JAL SOAP upstream error',
+      );
+      throw new ServiceUnavailableException('Upstream service unavailable');
+    }
   }
 }
