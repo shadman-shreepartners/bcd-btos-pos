@@ -1,10 +1,13 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -35,8 +38,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = this.extractMessage(exception, status);
-    const errorCode = this.resolveErrorCode(status);
+    const message = this.extractMessage(exception);
+    const errorCode = this.resolveErrorCode(exception);
 
     if (status >= 500) {
       this.logger.error(
@@ -63,13 +66,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
   }
 
-  private resolveErrorCode(status: number): ErrorCode {
-    if (status === 401) return 'AUTH_UNAUTHORIZED';
-    if (status === 403) return 'AUTH_FORBIDDEN';
-    if (status === 404) return 'RESOURCE_NOT_FOUND';
-    if (status === 409) return 'CONFLICT';
-    if (status === 400) return 'VALIDATION_FAILED';
-    if (status === 503) return 'UPSTREAM_UNAVAILABLE';
+  private resolveErrorCode(exception: unknown): ErrorCode {
+    if (exception instanceof NotFoundException) return 'RESOURCE_NOT_FOUND';
+    if (exception instanceof BadRequestException) return 'VALIDATION_FAILED';
+    if (exception instanceof ServiceUnavailableException)
+      return 'UPSTREAM_UNAVAILABLE';
     return 'INTERNAL_ERROR';
   }
 
@@ -88,11 +89,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   // Handles three cases: string message, validation array, or unknown (generic 500)
-  private extractMessage(exception: unknown, status: number): string {
-    if (status >= 500) {
-      return 'Internal server error';
-    }
-
+  private extractMessage(exception: unknown): string {
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
       if (typeof response === 'string') return response;
