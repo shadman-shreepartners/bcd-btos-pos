@@ -90,8 +90,8 @@ function mapReservation(raw: unknown): JalRetrieveReservationDto {
   const o = asRecord(raw) ?? {};
   const r = new JalRetrieveReservationDto();
   r.projectNumber = str(o.projectNumber);
-  r.masterPnrNumber = str(o.masterPNRNumber);
-  r.pnrNumber = str(o.PNRNumber);
+  r.masterPnrNumber = str(o.masterPnrNumber ?? o.masterPNRNumber);
+  r.pnrNumber = str(o.pnrNumber ?? o.PNRNumber);
   r.reservationDate = str(o.reservationDate);
   r.representativeName = str(o.representativeName);
   r.phoneNumber = str(o.phoneNumber);
@@ -149,7 +149,9 @@ export function mapSoapToJalRetrieveResponse(
 
   const primaryReservation = dto.reservations[0];
   if (primaryReservation) {
-    dto.projectNumber = primaryReservation.projectNumber ?? requestedProjectNumber;
+    const primaryProjectNumber =
+      primaryReservation.projectNumber ?? requestedProjectNumber;
+    dto.projectNumber = primaryProjectNumber;
     dto.masterPnrNumber = primaryReservation.masterPnrNumber;
     dto.pnrNumber = primaryReservation.pnrNumber;
     dto.reservationDate = primaryReservation.reservationDate;
