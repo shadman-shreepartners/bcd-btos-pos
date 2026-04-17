@@ -8,6 +8,12 @@ async function bootstrap(): Promise<void> {
 
   app.useLogger(app.get(Logger));
 
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   app.setGlobalPrefix('api/v1', {
     exclude: ['health'],
   });

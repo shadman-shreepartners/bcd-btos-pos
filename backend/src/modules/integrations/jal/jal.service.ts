@@ -74,7 +74,7 @@ export class JalService {
       const data = mapSoapToJalRetrieveResponse(raw, request.projectNumber);
 
       // Check for business not-found scenario (e.g., SZ15)
-      const firstErrorCode = data.reservations[0]?.errorCode;
+      const firstErrorCode = data.reservationInfo[0]?.errorCode;
       if (firstErrorCode === 'SZ15') {
         this.logger.warn(
           {
@@ -89,7 +89,7 @@ export class JalService {
       this.logger.info(
         {
           projectNumber: request.projectNumber,
-          reservationCount: data.reservations.length,
+          reservationCount: data.reservationInfo.length,
           action: 'retrieveBooking',
         },
         'JAL retrieve booking completed',

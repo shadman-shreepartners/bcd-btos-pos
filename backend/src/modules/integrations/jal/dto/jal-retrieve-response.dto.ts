@@ -7,23 +7,32 @@ import {
 /** Single flight segment in API response */
 export class JalRetrieveFlightDto implements JalSoapFlightInfo {
   flightNumber?: string;
-  departureAirport?: string;
-  arrivalAirport?: string;
+  departureCode?: string;
+  departureName?: string;
+  arrivalCode?: string;
+  arrivalName?: string;
   departureTime?: string;
   arrivalTime?: string;
   boardingDate?: string;
-  cabinClass?: string;
-  status?: string;
+  reservationClassName?: string;
+  reservationClassCode?: string;
+  reservationStatus?: string;
+  airTicketNumber?: string;
+  aircraftType?: string;
   seatNumber?: string;
+  flightFare?: string;
 }
 
 /** Passenger + their flights */
 export class JalRetrievePassengerDto implements JalSoapPassengerInfo {
-  surname?: string;
-  givenName?: string;
+  passengerPnrNumber?: string;
+  employeeNumber?: string;
+  lastNameRomaji?: string;
+  firstNameRomaji?: string;
+  firstNameKanji?: string;
+  lastNameKanji?: string;
   jmbNumber?: string;
-  fare?: string;
-  ticketingDeadline?: string;
+  passengerFare?: string;
   flights: JalRetrieveFlightDto[] = [];
 }
 
@@ -32,6 +41,9 @@ export class JalRetrieveReservationDto implements JalSoapReservationInfo {
   projectNumber?: string;
   masterPnrNumber?: string;
   pnrNumber?: string;
+  reservationDate?: string;
+  representativeName?: string;
+  phoneNumber?: string;
   fareTotal?: string;
   /** JAL business error code when present (e.g. SZ15, S001) */
   errorCode?: string;
@@ -41,7 +53,5 @@ export class JalRetrieveReservationDto implements JalSoapReservationInfo {
 
 /** Response body for POST /integrations/jal/retrieve */
 export class JalRetrieveResponseDto {
-  /** Echo / fallback from request when SOAP body does not repeat it */
-  projectNumber!: string;
-  reservations: JalRetrieveReservationDto[] = [];
+  reservationInfo: JalRetrieveReservationDto[] = [];
 }

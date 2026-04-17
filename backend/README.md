@@ -36,6 +36,8 @@ npm ci
 - **Health check:** `GET /health`
 - **JAL SSO:** `POST /api/v1/integrations/jal/sso` — returns form fields for browser POST to JAL
 - **JAL retrieve:** `POST /api/v1/integrations/jal/retrieve` — SOAP RetrieveProcedure by `projectNumber` (body JSON)
+- **ANA SSO:** `POST /api/v1/integrations/ana/sso` — returns form fields for browser POST to ANA Biz SSO portal
+- **Ekispert search:** `POST /api/v1/integrations/ekispert/search` — server-side route search proxy with API key kept out of the browser
 
 ```bash
 # Health check
@@ -59,4 +61,9 @@ Environment variables validated at startup via zod. App refuses to start if requ
 | `JAL_SOAP_BASIC_USER` | No | — | HTTP Basic user for SOAP (set with password) |
 | `JAL_SOAP_BASIC_PASSWORD` | No | — | HTTP Basic password for SOAP (set with user) |
 | `JAL_SOAP_RETRIEVE_OPERATION` | No | `RetrieveProcedure` | SOAP operation name (without `Async` suffix) |
+| `ANA_SSO_URL` | No | ANA Biz portal URL | ANA Biz SSO endpoint |
+| `ANA_SEND_DATA_URL` | No | — | BTOS callback URL ANA posts booking data to |
+| `ANA_SSO_CREDENTIALS` | Yes | — | JSON array of per-company credential records (companyId, employeeId, loginId, loginPw, adminUserId, userId, passwd, corpCode) |
+| `EKISPERT_API_KEY` | Yes | — | API key for Ekispert route search proxy |
+| `EKISPERT_BASE_URL` | No | — | Ekispert upstream base URL |
 

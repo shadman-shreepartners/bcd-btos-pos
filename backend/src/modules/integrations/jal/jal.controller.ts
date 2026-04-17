@@ -5,6 +5,10 @@ import { JalRetrieveRequestDto } from './dto/jal-retrieve-request.dto';
 import { JalRetrieveResponseDto } from './dto/jal-retrieve-response.dto';
 import { JalSsoRequestDto } from './dto/jal-sso-request.dto';
 import { JalSsoResponseDto } from './dto/jal-sso-response.dto';
+import {
+  ResponseHelper,
+  SuccessResponse,
+} from '../../../common/interfaces/response';
 
 @Controller('integrations/jal')
 export class JalController {
@@ -23,11 +27,15 @@ export class JalController {
   @Post('retrieve')
   async retrieveBooking(
     @Body() request: JalRetrieveRequestDto,
-  ): Promise<JalRetrieveResponseDto> {
+  ): Promise<SuccessResponse<JalRetrieveResponseDto>> {
     this.logger.info(
       { projectNumber: request.projectNumber },
       'JAL retrieve request received',
     );
-    return this.jalService.retrieveBooking(request);
+    const data = await this.jalService.retrieveBooking(request);
+    return ResponseHelper.success(
+      data,
+      'Successfully retrieved JAL reservation',
+    );
   }
 }

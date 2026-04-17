@@ -54,12 +54,14 @@ export class HttpClientService {
         return response.data;
       } catch (error) {
         if (this.isNonRetryable(error)) {
+          this.logUpstreamError(error, provider, endpoint);
           this.normalizeError(error, provider, endpoint, timeoutMs);
         }
 
         const isLastAttempt = attempt === retries;
 
         if (isLastAttempt) {
+          this.logUpstreamError(error, provider, endpoint);
           this.normalizeError(error, provider, endpoint, timeoutMs);
         }
 
@@ -122,8 +124,37 @@ export class HttpClientService {
       provider,
       endpoint,
       error.response.status,
-      typeof error.response.data === 'string' ? error.response.data : undefined,
+      this.extractProviderMessage(error.response.data),
     );
+  }
+
+  private logUpstreamError(
+    error: unknown,
+    provider: string,
+    endpoint: string,
+  ): void {
+    if (!axios.isAxiosError(error) || !error.response) return;
+    this.logger.error(
+      {
+        provider,
+        endpoint,
+        upstreamStatus: error.response.status,
+        upstreamBody: this.extractProviderMessage(error.response.data),
+      },
+      `[${provider}] ${endpoint} returned ${error.response.status}`,
+    );
+  }
+
+  private extractProviderMessage(data: unknown): string | undefined {
+    if (typeof data === 'string') return data || undefined;
+    if (data !== null && data !== undefined) {
+      try {
+        return JSON.stringify(data);
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
   }
 
   /** 4xx errors are client mistakes — retrying won't fix them */

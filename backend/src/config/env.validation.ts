@@ -30,6 +30,54 @@ export const envSchema = z
       .default('getRecordDetailFromProject'),
     /** SOAP HTTP request timeout in milliseconds (default: 30 000 ms) */
     JAL_SOAP_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+
+    // Ekispert route search — API key and upstream base URL for the proxy
+    EKISPERT_API_KEY: z.string().trim().min(1),
+    EKISPERT_BASE_URL: z
+      .string()
+      .url()
+      .default('http://api.ekispert.jp/v1/json'),
+
+    // ANA SSO — credentials resolved by companyId + employeeId mapping
+    ANA_SSO_URL: z
+      .string()
+      .url()
+      .default(
+        'https://aswbe-d.ana.co.jp/9Eile48/dms/redbe/dyc/be/pages/bizlogin/bizSeamlessLoginDispatch.xhtml',
+      ),
+    ANA_SEND_DATA_URL: z
+      .string()
+      .trim()
+      .min(1)
+      .default('/api/v1/integrations/ana/sso/callback'),
+    ANA_SSO_CREDENTIALS: z
+      .string()
+      .min(1)
+      .transform((raw, ctx) => {
+        try {
+          return JSON.parse(raw) as unknown;
+        } catch {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'ANA_SSO_CREDENTIALS must be valid JSON',
+          });
+          return z.NEVER;
+        }
+      })
+      .pipe(
+        z.array(
+          z.object({
+            companyId: z.string().trim().min(1),
+            employeeId: z.string().trim().min(1),
+            loginId: z.string().trim().min(1),
+            loginPw: z.string().trim().min(1),
+            adminUserId: z.string(),
+            userId: z.string().trim().min(1),
+            passwd: z.string().trim().min(1),
+            corpCode: z.string().trim().optional(),
+          }),
+        ),
+      ),
   })
   .refine(
     (env) =>

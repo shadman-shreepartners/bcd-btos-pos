@@ -146,12 +146,12 @@ describe('JalService', () => {
       expect(mockRetrieveByProjectNumber).toHaveBeenCalledWith(
         'M5555J260300050',
       );
-      expect(result.projectNumber).toBe('M5555J260300050');
-      expect(result.reservations).toHaveLength(1);
-      expect(result.reservations[0].passengers[0].surname).toBe('TANAKA');
-      expect(result.reservations[0].passengers[0].flights[0].flightNumber).toBe(
-        'JL123',
-      );
+      expect(result.reservationInfo).toHaveLength(1);
+      expect(result.reservationInfo[0].projectNumber).toBe('M5555J260300050');
+      expect(result.reservationInfo[0].passengers[0].lastNameRomaji).toBe('TANAKA');
+      expect(
+        result.reservationInfo[0].passengers[0].flights[0].flightNumber,
+      ).toBe('JL123');
     });
 
     it('should return empty reservations when SOAP returns null', async () => {
@@ -161,8 +161,7 @@ describe('JalService', () => {
         projectNumber: 'PN-EMPTY',
       });
 
-      expect(result.projectNumber).toBe('PN-EMPTY');
-      expect(result.reservations).toEqual([]);
+      expect(result.reservationInfo).toEqual([]);
     });
 
     it('should propagate ServiceUnavailableException from SOAP client', async () => {
