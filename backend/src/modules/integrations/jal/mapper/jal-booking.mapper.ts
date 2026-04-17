@@ -41,19 +41,13 @@ function mapFlight(raw: unknown): JalRetrieveFlightDto {
   const f = new JalRetrieveFlightDto();
   f.flightNumber = str(o.flightNumber);
   f.departureAirport = str(o.departureCode);
-  f.departureName = str(o.departureName);
   f.arrivalAirport = str(o.arrivalCode);
-  f.arrivalName = str(o.arrivalName);
   f.departureTime = str(o.departureTime);
   f.arrivalTime = str(o.arrivalTime);
   f.boardingDate = str(o.boardingDate);
   f.cabinClass = str(o.reservationClassName);
-  f.reservationClassCode = str(o.reservationClassCode);
   f.status = str(o.reservationStatus);
-  f.airTicketNumber = str(o.airTicketNumber);
-  f.aircraftType = str(o.aircraftType);
   f.seatNumber = str(o.seatNumber);
-  f.flightFare = str(o.flightFare);
   return f;
 }
 
@@ -64,20 +58,14 @@ function mapFlight(raw: unknown): JalRetrieveFlightDto {
 function mapPassenger(raw: unknown): JalRetrievePassengerDto {
   const o = asRecord(raw) ?? {};
   const p = new JalRetrievePassengerDto();
-  p.passengerPnrNumber = str(o.passengerPnrNumber);
-  p.employeeNumber = str(o.employeeNumber);
   p.surname = str(o.lastNameRomaji);
   p.givenName = str(o.firstNameRomaji);
-  p.firstNameKanji = str(o.firstNameKanji);
-  p.lastNameKanji = str(o.lastNameKanji);
   p.jmbNumber = str(o.jmbNumber);
   p.fare = str(o.passengerFare);
   p.ticketingDeadline = str(o.issuePeriodMsg);
-  const flightContainer = asRecord(
-    o.flightInfo ?? o.FlightInfo ?? o.flights ?? o.Flights,
-  );
+  const flightContainer = asRecord(o.flightInfo ?? o.FlightInfo);
   p.flights = firstArray(
-    flightContainer?.item ?? o.flightInfo ?? o.FlightInfo ?? o.flights,
+    flightContainer?.item ?? o.flightInfo ?? o.FlightInfo,
   ).map((x) => mapFlight(x));
   return p;
 }
@@ -90,22 +78,14 @@ function mapReservation(raw: unknown): JalRetrieveReservationDto {
   const o = asRecord(raw) ?? {};
   const r = new JalRetrieveReservationDto();
   r.projectNumber = str(o.projectNumber);
-  r.masterPnrNumber = str(o.masterPnrNumber ?? o.masterPNRNumber);
-  r.pnrNumber = str(o.pnrNumber ?? o.PNRNumber);
-  r.reservationDate = str(o.reservationDate);
-  r.representativeName = str(o.representativeName);
-  r.phoneNumber = str(o.phoneNumber);
+  r.masterPnrNumber = str(o.masterPNRNumber);
+  r.pnrNumber = str(o.PNRNumber);
   r.fareTotal = str(o.fareTotal);
   r.errorCode = str(o.errorCode);
   r.errorMessage = str(o.errorMessage);
-  const passengerContainer = asRecord(
-    o.passengerInfo ?? o.PassengerInfo ?? o.passengers ?? o.Passengers,
-  );
+  const passengerContainer = asRecord(o.passengerInfo ?? o.PassengerInfo);
   r.passengers = firstArray(
-    passengerContainer?.item ??
-      o.passengerInfo ??
-      o.PassengerInfo ??
-      o.passengers,
+    passengerContainer?.item ?? o.passengerInfo ?? o.PassengerInfo,
   ).map((x) => mapPassenger(x));
   return r;
 }
@@ -135,33 +115,11 @@ export function mapSoapToJalRetrieveResponse(
 
   const unwrapped = unwrapSoapReturnBody(raw);
   const root = asRecord(unwrapped) ?? {};
-  // JAL returns reservations under .item (SOAP encoded array), .ReservationInfo,
-  // or lower-camel sample payloads like .reservationInfo.
-  const resRaw =
-    root.item ??
-    root.ReservationInfo ??
-    root.reservationInfo ??
-    root.reservations ??
-    unwrapped;
+  // JAL returns reservations under .item (SOAP encoded array) or .ReservationInfo
+  const resRaw = root.item ?? root.ReservationInfo ?? unwrapped;
 
   const list = firstArray(resRaw);
   dto.reservations = list.map((item) => mapReservation(item));
-
-  const primaryReservation = dto.reservations[0];
-  if (primaryReservation) {
-    const primaryProjectNumber =
-      primaryReservation.projectNumber ?? requestedProjectNumber;
-    dto.projectNumber = primaryProjectNumber;
-    dto.masterPnrNumber = primaryReservation.masterPnrNumber;
-    dto.pnrNumber = primaryReservation.pnrNumber;
-    dto.reservationDate = primaryReservation.reservationDate;
-    dto.representativeName = primaryReservation.representativeName;
-    dto.phoneNumber = primaryReservation.phoneNumber;
-    dto.fareTotal = primaryReservation.fareTotal;
-    dto.errorCode = primaryReservation.errorCode;
-    dto.errorMessage = primaryReservation.errorMessage;
-    dto.passengers = primaryReservation.passengers;
-  }
 
   if (
     dto.reservations.length === 1 &&

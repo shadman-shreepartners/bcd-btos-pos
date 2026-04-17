@@ -36,8 +36,10 @@ context.md
 .cursor/settings.json
 tickets.md
 techStack.md
-guide/
+guides/
 .cursor/rules/model-usage.mdc
 /analysis
-/plan
+/plans
 /.cursor
+/.github
+/guide
