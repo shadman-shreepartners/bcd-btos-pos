@@ -90,6 +90,10 @@ Go to **GitHub repo > Settings > Secrets and variables > Actions > New repositor
 | `JAL_SOAP_CORPORATE_ID`  | Corporate ID for SOAP `in0`                     |
 | `JAL_SOAP_BASIC_USER`    | (Optional) HTTP Basic auth username             |
 | `JAL_SOAP_BASIC_PASSWORD`| (Optional) HTTP Basic auth password             |
+| `EKISPERT_API_KEY`       | Ekispert route search API key                   |
+| `ANA_SSO_CREDENTIALS`    | Single-line JSON array of ANA SSO credentials   |
+
+`ANA_SSO_CREDENTIALS` should be stored as minified JSON so it survives being written into `backend/.env` during the deploy workflow.
 
 ### What the workflow does
 

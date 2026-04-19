@@ -90,6 +90,8 @@ jobs:
             JAL_SOAP_CORPORATE_ID=${{ secrets.JAL_SOAP_CORPORATE_ID }}
             JAL_SOAP_BASIC_USER=${{ secrets.JAL_SOAP_BASIC_USER }}
             JAL_SOAP_BASIC_PASSWORD=${{ secrets.JAL_SOAP_BASIC_PASSWORD }}
+            EKISPERT_API_KEY=${{ secrets.EKISPERT_API_KEY }}
+            ANA_SSO_CREDENTIALS=${{ secrets.ANA_SSO_CREDENTIALS }}
             EOF
 
             # Ensure nginx is configured
