@@ -4,11 +4,6 @@ node_modules/
 # Build
 dist/
 
-# Environment
-.env
-.env.local
-.env.*.local
-
 # IDE
 .idea/
 .vscode/
