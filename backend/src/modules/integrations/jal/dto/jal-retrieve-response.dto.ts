@@ -7,16 +7,16 @@ import {
 /** Single flight segment in API response */
 export class JalRetrieveFlightDto implements JalSoapFlightInfo {
   flightNumber?: string;
-  departureCode?: string;
+  departureAirport?: string;
   departureName?: string;
-  arrivalCode?: string;
+  arrivalAirport?: string;
   arrivalName?: string;
   departureTime?: string;
   arrivalTime?: string;
   boardingDate?: string;
-  reservationClassName?: string;
+  cabinClass?: string;
   reservationClassCode?: string;
-  reservationStatus?: string;
+  status?: string;
   airTicketNumber?: string;
   aircraftType?: string;
   seatNumber?: string;
@@ -27,12 +27,13 @@ export class JalRetrieveFlightDto implements JalSoapFlightInfo {
 export class JalRetrievePassengerDto implements JalSoapPassengerInfo {
   passengerPnrNumber?: string;
   employeeNumber?: string;
-  lastNameRomaji?: string;
-  firstNameRomaji?: string;
+  surname?: string;
+  givenName?: string;
   firstNameKanji?: string;
   lastNameKanji?: string;
   jmbNumber?: string;
-  passengerFare?: string;
+  fare?: string;
+  ticketingDeadline?: string;
   flights: JalRetrieveFlightDto[] = [];
 }
 
@@ -52,6 +53,8 @@ export class JalRetrieveReservationDto implements JalSoapReservationInfo {
 }
 
 /** Response body for POST /integrations/jal/retrieve */
-export class JalRetrieveResponseDto {
-  reservationInfo: JalRetrieveReservationDto[] = [];
+export class JalRetrieveResponseDto extends JalRetrieveReservationDto {
+  /** Echo / fallback from request when SOAP body does not repeat it */
+  override projectNumber!: string;
+  reservations: JalRetrieveReservationDto[] = [];
 }

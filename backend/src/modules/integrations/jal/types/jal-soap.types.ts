@@ -5,16 +5,18 @@
 
 export interface JalSoapFlightInfo {
   flightNumber?: string;
-  departureCode?: string;
+  /** IATA code — maps from `departureCode` in JAL response */
+  departureAirport?: string;
   departureName?: string;
-  arrivalCode?: string;
+  /** IATA code — maps from `arrivalCode` in JAL response */
+  arrivalAirport?: string;
   arrivalName?: string;
   departureTime?: string;
   arrivalTime?: string;
   boardingDate?: string;
-  reservationClassName?: string;
+  cabinClass?: string;
   reservationClassCode?: string;
-  reservationStatus?: string;
+  status?: string;
   airTicketNumber?: string;
   aircraftType?: string;
   seatNumber?: string;
@@ -24,12 +26,13 @@ export interface JalSoapFlightInfo {
 export interface JalSoapPassengerInfo {
   passengerPnrNumber?: string;
   employeeNumber?: string;
-  lastNameRomaji?: string;
-  firstNameRomaji?: string;
+  surname?: string;
+  givenName?: string;
   firstNameKanji?: string;
   lastNameKanji?: string;
   jmbNumber?: string;
-  passengerFare?: string;
+  fare?: string;
+  ticketingDeadline?: string;
   flights: JalSoapFlightInfo[];
 }
 

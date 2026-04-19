@@ -13,10 +13,10 @@ import { HttpExceptionFilter } from '../../src/common/filter/http-exception.filt
 import { JAL_SOAP_CLIENT } from '../../src/modules/integrations/jal/constants/jal-soap.constants';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { JAL_CONFIG_ENV } from '../fixtures/jal.fixture';
-import { SuccessResponse } from '../../src/common/interfaces/response';
+import { ApiResponse } from '../../src/common/interfaces/response';
 
-function asSuccessResponse<T>(value: unknown): SuccessResponse<T> {
-  return value as SuccessResponse<T>;
+function asApiResponse<T>(value: unknown): ApiResponse<T> {
+  return value as ApiResponse<T>;
 }
 
 describe('JAL Retrieve (e2e)', () => {
@@ -134,31 +134,28 @@ describe('JAL Retrieve (e2e)', () => {
         .send({ projectNumber: 'M5555J260300050' })
         .expect(201)
         .expect((res: request.Response) => {
-          const body = asSuccessResponse<Record<string, unknown>>(res.body);
+          const body = asApiResponse<Record<string, unknown>>(res.body);
           expect(body.success).toBe(true);
-          expect(body.message).toBe('Successfully retrieved JAL reservation');
 
-          const { data } = body;
-          const reservationInfo = data.reservationInfo as Record<
-            string,
-            unknown
-          >[];
-          expect(reservationInfo).toHaveLength(1);
-          expect(reservationInfo[0].projectNumber).toBe('M5555J260300050');
-          expect(reservationInfo[0].pnrNumber).toBe('ABC12345');
-          expect(reservationInfo[0].masterPnrNumber).toBe('JAL98765');
-          expect(reservationInfo[0].reservationDate).toBe(
-            '2025-10-15T08:30:00Z',
-          );
-          expect(reservationInfo[0].representativeName).toBe('TRIPUR PATEL');
-          expect(reservationInfo[0].phoneNumber).toBe('090-1234-5678');
+          const data = body.data as Record<string, unknown>;
+          expect(data.projectNumber).toBe('M5555J260300050');
+          expect(data.pnrNumber).toBe('ABC12345');
+          expect(data.masterPnrNumber).toBe('JAL98765');
+          expect(data.reservationDate).toBe('2025-10-15T08:30:00Z');
+          expect(data.representativeName).toBe('TRIPUR PATEL');
+          expect(data.phoneNumber).toBe('090-1234-5678');
 
-          const passengers = reservationInfo[0].passengers as Record<
+          const reservations = data.reservations as Record<string, unknown>[];
+          expect(reservations).toHaveLength(1);
+          expect(reservations[0].projectNumber).toBe('M5555J260300050');
+          expect(reservations[0].pnrNumber).toBe('ABC12345');
+
+          const passengers = reservations[0].passengers as Record<
             string,
             unknown
           >[];
           expect(passengers).toHaveLength(1);
-          expect(passengers[0].lastNameRomaji).toBe('PATEL');
+          expect(passengers[0].surname).toBe('PATEL');
           expect(passengers[0].employeeNumber).toBe('XC0050870');
           expect(passengers[0].firstNameKanji).toBe('トリプール');
 

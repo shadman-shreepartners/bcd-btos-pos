@@ -42,3 +42,6 @@ guide/
 /plan
 /.cursor
 /.github
+frontend/ana-sso.html
+.gitignore
+frontend/jal-sso.html
