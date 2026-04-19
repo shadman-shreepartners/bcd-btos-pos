@@ -18,6 +18,18 @@ export const JAL_CONFIG_ENV: Record<string, string> = {
   JAL_SOAP_WSDL_URL: 'https://example.com/jal-mock.wsdl',
   JAL_SOAP_CORPORATE_ID: 'C0050874',
   JAL_SOAP_TIMEOUT_MS: '30000',
+  // ANA — required by global env validation schema
+  ANA_SSO_CREDENTIALS: JSON.stringify([
+    {
+      companyId: 'dummy',
+      employeeId: 'dummy',
+      loginId: 'dummy',
+      loginPw: 'dummy',
+      adminUserId: '',
+      userId: 'dummy',
+      passwd: 'dummy',
+    },
+  ]),
 };
 
 export const validSsoRequest: JalSsoRequestDto = {

@@ -15,13 +15,31 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 /**
  * Coerce to string — handles both plain strings and
  * SOAP `{ attributes: {...}, $value: "..." }` wrapper objects.
+ * Returns empty string as-is so callers can distinguish "absent" from "empty".
  */
 function str(value: unknown): string | undefined {
-  if (typeof value === 'string') return value.length > 0 ? value : undefined;
+  if (typeof value === 'string') return value;
   if (value && typeof value === 'object') {
     const v = (value as Record<string, unknown>).$value;
-    if (typeof v === 'string') return v.length > 0 ? v : undefined;
+    if (typeof v === 'string') return v;
     if (typeof v === 'number') return String(v);
+  }
+  return undefined;
+}
+
+function num(value: unknown): number | undefined {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? undefined : parsed;
+  }
+  if (value && typeof value === 'object') {
+    const v = (value as Record<string, unknown>).$value;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'string') {
+      const parsed = parseFloat(v);
+      return isNaN(parsed) ? undefined : parsed;
+    }
   }
   return undefined;
 }
@@ -40,20 +58,20 @@ function mapFlight(raw: unknown): JalRetrieveFlightDto {
   const o = asRecord(raw) ?? {};
   const f = new JalRetrieveFlightDto();
   f.flightNumber = str(o.flightNumber);
-  f.departureAirport = str(o.departureCode);
-  f.departureName = str(o.departureName);
-  f.arrivalAirport = str(o.arrivalCode);
-  f.arrivalName = str(o.arrivalName);
-  f.departureTime = str(o.departureTime);
-  f.arrivalTime = str(o.arrivalTime);
   f.boardingDate = str(o.boardingDate);
-  f.cabinClass = str(o.reservationClassName);
+  f.departureCode = str(o.departureCode ?? o.departureAirport);
+  f.departureName = str(o.departureName);
+  f.departureTime = str(o.departureTime);
+  f.arrivalCode = str(o.arrivalCode ?? o.arrivalAirport);
+  f.arrivalName = str(o.arrivalName);
+  f.arrivalTime = str(o.arrivalTime);
+  f.seatNumber = str(o.seatNumber);
+  f.reservationClassName = str(o.reservationClassName ?? o.cabinClass);
   f.reservationClassCode = str(o.reservationClassCode);
-  f.status = str(o.reservationStatus);
+  f.reservationStatus = str(o.reservationStatus ?? o.status ?? o.bookingStatus);
   f.airTicketNumber = str(o.airTicketNumber);
   f.aircraftType = str(o.aircraftType);
-  f.seatNumber = str(o.seatNumber);
-  f.flightFare = str(o.flightFare);
+  f.flightFare = num(o.flightFare);
   return f;
 }
 
@@ -66,13 +84,12 @@ function mapPassenger(raw: unknown): JalRetrievePassengerDto {
   const p = new JalRetrievePassengerDto();
   p.passengerPnrNumber = str(o.passengerPnrNumber);
   p.employeeNumber = str(o.employeeNumber);
-  p.surname = str(o.lastNameRomaji);
-  p.givenName = str(o.firstNameRomaji);
+  p.firstNameRomaji = str(o.firstNameRomaji ?? o.givenName);
+  p.lastNameRomaji = str(o.lastNameRomaji ?? o.surname);
   p.firstNameKanji = str(o.firstNameKanji);
   p.lastNameKanji = str(o.lastNameKanji);
   p.jmbNumber = str(o.jmbNumber);
-  p.fare = str(o.passengerFare);
-  p.ticketingDeadline = str(o.issuePeriodMsg);
+  p.passengerFare = num(o.passengerFare ?? o.fare);
   const flightContainer = asRecord(
     o.flightInfo ?? o.FlightInfo ?? o.flights ?? o.Flights,
   );
@@ -89,13 +106,13 @@ function mapPassenger(raw: unknown): JalRetrievePassengerDto {
 function mapReservation(raw: unknown): JalRetrieveReservationDto {
   const o = asRecord(raw) ?? {};
   const r = new JalRetrieveReservationDto();
-  r.projectNumber = str(o.projectNumber);
-  r.masterPnrNumber = str(o.masterPnrNumber ?? o.masterPNRNumber);
   r.pnrNumber = str(o.pnrNumber ?? o.PNRNumber);
+  r.masterPnrNumber = str(o.masterPnrNumber ?? o.masterPNRNumber);
+  r.projectNumber = str(o.projectNumber);
   r.reservationDate = str(o.reservationDate);
   r.representativeName = str(o.representativeName);
   r.phoneNumber = str(o.phoneNumber);
-  r.fareTotal = str(o.fareTotal);
+  r.fareTotal = num(o.fareTotal);
   r.errorCode = str(o.errorCode);
   r.errorMessage = str(o.errorMessage);
   const passengerContainer = asRecord(
@@ -123,11 +140,9 @@ function unwrapSoapReturnBody(raw: unknown): unknown {
  */
 export function mapSoapToJalRetrieveResponse(
   raw: unknown,
-  requestedProjectNumber: string,
 ): JalRetrieveResponseDto {
   const dto = new JalRetrieveResponseDto();
-  dto.projectNumber = requestedProjectNumber;
-  dto.reservations = [];
+  dto.reservationInfo = [];
 
   if (raw == null) {
     return dto;
@@ -145,31 +160,7 @@ export function mapSoapToJalRetrieveResponse(
     unwrapped;
 
   const list = firstArray(resRaw);
-  dto.reservations = list.map((item) => mapReservation(item));
-
-  const primaryReservation = dto.reservations[0];
-  if (primaryReservation) {
-    const primaryProjectNumber =
-      primaryReservation.projectNumber ?? requestedProjectNumber;
-    dto.projectNumber = primaryProjectNumber;
-    dto.masterPnrNumber = primaryReservation.masterPnrNumber;
-    dto.pnrNumber = primaryReservation.pnrNumber;
-    dto.reservationDate = primaryReservation.reservationDate;
-    dto.representativeName = primaryReservation.representativeName;
-    dto.phoneNumber = primaryReservation.phoneNumber;
-    dto.fareTotal = primaryReservation.fareTotal;
-    dto.errorCode = primaryReservation.errorCode;
-    dto.errorMessage = primaryReservation.errorMessage;
-    dto.passengers = primaryReservation.passengers;
-  }
-
-  if (
-    dto.reservations.length === 1 &&
-    !dto.reservations[0].projectNumber &&
-    requestedProjectNumber
-  ) {
-    dto.reservations[0].projectNumber = requestedProjectNumber;
-  }
+  dto.reservationInfo = list.map((item) => mapReservation(item));
 
   return dto;
 }

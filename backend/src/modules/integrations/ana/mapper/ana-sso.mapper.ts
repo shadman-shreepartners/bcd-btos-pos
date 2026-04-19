@@ -34,8 +34,8 @@ export function mapToAnaSsoResponse(
     sendDataFlg: ANA_SSO_SEND_DATA_FLG,
     sendDataUrl: config.sendDataUrl,
     sendDataType: ANA_SSO_SEND_DATA_TYPE,
-    dateFlight1: '',
-    dateFlight2: '',
+    dateFlight1: request.dateFlight1 ?? '',
+    dateFlight2: request.dateFlight2 ?? '',
   };
 
   const response = new AnaSsoResponseDto();

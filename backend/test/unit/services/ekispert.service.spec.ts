@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { ServiceUnavailableException } from '@nestjs/common';
 import { EkispertService } from '../../../src/modules/integrations/ekispert/ekispert.service';
 import { HttpClientService } from '../../../src/common/http/http-client.service';
+import { ProviderUnavailableException } from '../../../src/common/exceptions';
 import {
   EKISPERT_CONFIG_ENV,
   EKISPERT_RAW_SINGLE_RESPONSE,
@@ -110,7 +110,7 @@ describe('EkispertService', () => {
     httpClientGetMock.mockRejectedValue(new Error('timeout'));
 
     await expect(service.search(EKISPERT_SEARCH_REQUEST)).rejects.toThrow(
-      ServiceUnavailableException,
+      ProviderUnavailableException,
     );
   });
 });

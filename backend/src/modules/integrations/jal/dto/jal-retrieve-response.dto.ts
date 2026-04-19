@@ -1,60 +1,50 @@
-import {
-  JalSoapFlightInfo,
-  JalSoapPassengerInfo,
-  JalSoapReservationInfo,
-} from '../types/jal-soap.types';
-
 /** Single flight segment in API response */
-export class JalRetrieveFlightDto implements JalSoapFlightInfo {
+export class JalRetrieveFlightDto {
   flightNumber?: string;
-  departureAirport?: string;
-  departureName?: string;
-  arrivalAirport?: string;
-  arrivalName?: string;
-  departureTime?: string;
-  arrivalTime?: string;
   boardingDate?: string;
-  cabinClass?: string;
+  departureCode?: string;
+  departureName?: string;
+  departureTime?: string;
+  arrivalCode?: string;
+  arrivalName?: string;
+  arrivalTime?: string;
+  seatNumber?: string;
+  reservationClassName?: string;
   reservationClassCode?: string;
-  status?: string;
+  reservationStatus?: string;
   airTicketNumber?: string;
   aircraftType?: string;
-  seatNumber?: string;
-  flightFare?: string;
+  flightFare?: number;
 }
 
 /** Passenger + their flights */
-export class JalRetrievePassengerDto implements JalSoapPassengerInfo {
+export class JalRetrievePassengerDto {
   passengerPnrNumber?: string;
   employeeNumber?: string;
-  surname?: string;
-  givenName?: string;
+  firstNameRomaji?: string;
+  lastNameRomaji?: string;
   firstNameKanji?: string;
   lastNameKanji?: string;
   jmbNumber?: string;
-  fare?: string;
-  ticketingDeadline?: string;
+  passengerFare?: number;
   flights: JalRetrieveFlightDto[] = [];
 }
 
 /** One reservation tree */
-export class JalRetrieveReservationDto implements JalSoapReservationInfo {
-  projectNumber?: string;
-  masterPnrNumber?: string;
+export class JalRetrieveReservationDto {
   pnrNumber?: string;
+  masterPnrNumber?: string;
+  projectNumber?: string;
   reservationDate?: string;
   representativeName?: string;
   phoneNumber?: string;
-  fareTotal?: string;
-  /** JAL business error code when present (e.g. SZ15, S001) */
+  fareTotal?: number;
   errorCode?: string;
   errorMessage?: string;
   passengers: JalRetrievePassengerDto[] = [];
 }
 
 /** Response body for POST /integrations/jal/retrieve */
-export class JalRetrieveResponseDto extends JalRetrieveReservationDto {
-  /** Echo / fallback from request when SOAP body does not repeat it */
-  override projectNumber!: string;
-  reservations: JalRetrieveReservationDto[] = [];
+export class JalRetrieveResponseDto {
+  reservationInfo: JalRetrieveReservationDto[] = [];
 }

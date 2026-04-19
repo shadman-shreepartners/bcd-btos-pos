@@ -71,10 +71,10 @@ export class JalService {
         request.projectNumber,
       );
 
-      const data = mapSoapToJalRetrieveResponse(raw, request.projectNumber);
+      const data = mapSoapToJalRetrieveResponse(raw);
 
       // Check for business not-found scenario (e.g., SZ15)
-      const firstErrorCode = data.reservations[0]?.errorCode;
+      const firstErrorCode = data.reservationInfo[0]?.errorCode;
       if (firstErrorCode === 'SZ15') {
         this.logger.warn(
           {
@@ -89,7 +89,7 @@ export class JalService {
       this.logger.info(
         {
           projectNumber: request.projectNumber,
-          reservationCount: data.reservations.length,
+          reservationCount: data.reservationInfo.length,
           action: 'retrieveBooking',
         },
         'JAL retrieve booking completed',
@@ -108,7 +108,7 @@ export class JalService {
       // All other errors are upstream/SOAP/network failures -> 503
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        { projectNumber: request.projectNumber, error: message },
+        { projectNumber: request.projectNumber, err: message },
         'JAL SOAP upstream error',
       );
       throw new ServiceUnavailableException('Upstream service unavailable');

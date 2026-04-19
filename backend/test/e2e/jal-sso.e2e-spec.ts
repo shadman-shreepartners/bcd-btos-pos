@@ -8,6 +8,8 @@ import { validate } from '../../src/config/env.validation';
 import { IntegrationsModule } from '../../src/modules/integrations/integrations.module';
 import { AppController } from '../../src/app.controller';
 import { JAL_CONFIG_ENV } from '../fixtures/jal.fixture';
+import { EKISPERT_CONFIG_ENV } from '../fixtures/ekispert.fixture';
+import { HttpClientModule } from '../../src/common/http/http-client.module';
 import { AppService } from '../../src/app.service';
 import { ResponseInterceptor } from '../../src/common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from '../../src/common/filter/http-exception.filter';
@@ -29,6 +31,7 @@ describe('JAL SSO (e2e)', () => {
       PORT: '3004',
       NODE_ENV: 'test',
       ...JAL_CONFIG_ENV,
+      ...EKISPERT_CONFIG_ENV,
     });
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -39,6 +42,7 @@ describe('JAL SSO (e2e)', () => {
           ignoreEnvFile: true,
         }),
         LoggerModule.forRoot({ pinoHttp: { level: 'silent' } }),
+        HttpClientModule,
         IntegrationsModule,
       ],
       controllers: [AppController],

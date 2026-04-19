@@ -16,7 +16,10 @@ export class JalController {
 
   @Post('sso')
   buildSsoForm(@Body() request: JalSsoRequestDto): JalSsoResponseDto {
-    this.logger.info({ userId: request.id }, 'JAL SSO request received');
+    this.logger.info(
+      { userId: request.id, action: 'buildSsoForm' },
+      'JAL SSO request received',
+    );
     return this.jalService.buildSsoPayload(request);
   }
 
@@ -25,7 +28,7 @@ export class JalController {
     @Body() request: JalRetrieveRequestDto,
   ): Promise<JalRetrieveResponseDto> {
     this.logger.info(
-      { projectNumber: request.projectNumber },
+      { projectNumber: request.projectNumber, action: 'retrieveBooking' },
       'JAL retrieve request received',
     );
     return this.jalService.retrieveBooking(request);

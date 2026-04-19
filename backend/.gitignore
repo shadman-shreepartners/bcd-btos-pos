@@ -1,13 +1,13 @@
 # Dependencies
 node_modules/
 
-# Environment files
-.env
-.env.*
-!.env.example
-
 # Build
 dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # IDE
 .idea/
