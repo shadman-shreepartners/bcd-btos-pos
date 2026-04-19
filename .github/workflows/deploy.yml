@@ -109,25 +109,47 @@ jobs:
             chmod -R o+rx $DEPLOY_ROOT/frontend/dist
             chmod o+x $DEPLOY_ROOT $DEPLOY_ROOT/frontend
 
+            # Validate backend dist exists before starting PM2
+            if [ ! -f $DEPLOY_ROOT/backend/dist/main.js ]; then
+              echo "ERROR: backend/dist/main.js not found"
+              ls -la $DEPLOY_ROOT/backend/dist/ || true
+              exit 1
+            fi
+
             # Restart API via PM2
             cd $DEPLOY_ROOT
             export DEPLOY_ROOT
+
+            # Load environment variables from .env before starting PM2
+            if [ -f $DEPLOY_ROOT/backend/.env ]; then
+              set -a
+              source $DEPLOY_ROOT/backend/.env
+              set +a
+            else
+              echo "WARNING: $DEPLOY_ROOT/backend/.env not found, using defaults"
+            fi
+
             pm2 delete bcd-japan-integration-service 2>/dev/null || true
             pm2 start $DEPLOY_ROOT/deploy/ec2/ecosystem.config.cjs
             pm2 save
 
+            # Allow NestJS time to bootstrap before health checks begin
+            sleep 5
+
             # Health check (retry up to 60 seconds)
             echo "Checking health endpoint..."
+            pm2 status || true
             for i in $(seq 1 60); do
               if curl -fsS "http://127.0.0.1:${PORT:-3004}/health" >/dev/null 2>&1; then
                 echo "Health check passed"
                 exit 0
               fi
 
-              if [ $((i % 10)) -eq 0 ]; then
-                echo "Still waiting... ($i/60)"
+              if [ $((i % 10)) -eq 0 ] || [ $i -eq 1 ]; then
+                echo "Attempt $i/60 - waiting for health endpoint..."
                 pm2 status || true
-                ss -ltnp | grep ':3004' || true
+                ss -ltnp | grep ":${PORT:-3004}" || echo "Port ${PORT:-3004} not listening yet"
+                pm2 logs bcd-japan-integration-service --lines 50 --nostream || true
               fi
 
               sleep 1
