@@ -78,7 +78,7 @@ describe('JAL SSO (e2e)', () => {
     it('should return form fields in ApiResponse on valid request', () => {
       return request(server)
         .post('/api/v1/integrations/jal/sso')
-        .send({ id: 'XC0050870', projectNumber: 'M5555J260300050' })
+        .send({ id: 'XC0050870', corpId: 'M5555' })
         .expect(201)
         .expect((res: request.Response) => {
           const body = asApiResponse<Record<string, unknown>>(res.body);
@@ -92,14 +92,14 @@ describe('JAL SSO (e2e)', () => {
           const fields = data.fields as Record<string, unknown>;
           expect(fields).toBeDefined();
           expect(fields.id).toBe('XC0050870');
-          expect(fields.projectnumber).toBe('M5555J260300050');
+          expect(fields.projectnumber).toMatch(/^M5555J\d{9}$/);
         });
     });
 
     it('should return form fields with only required id', () => {
       return request(server)
         .post('/api/v1/integrations/jal/sso')
-        .send({ id: 'TESTUSER' })
+        .send({ id: 'TESTUSER', corpId: 'M5555' })
         .expect(201)
         .expect((res: request.Response) => {
           const body = asApiResponse<Record<string, unknown>>(res.body);
@@ -136,7 +136,7 @@ describe('JAL SSO (e2e)', () => {
     it('should return 400 on unknown fields (forbidNonWhitelisted)', () => {
       return request(server)
         .post('/api/v1/integrations/jal/sso')
-        .send({ id: 'USER1', hackerField: 'malicious' })
+        .send({ id: 'USER1', corpId: 'M5555', hackerField: 'malicious' })
         .expect(400)
         .expect((res: request.Response) => {
           const body = asApiResponse<Record<string, unknown>>(res.body);
@@ -181,12 +181,12 @@ describe('JAL SSO (e2e)', () => {
         .post('/api/v1/integrations/jal/sso')
         .send({
           id: 'XC0050870',
+          corpId: 'M5555',
           password: 'pass123',
           prmSurName: 'TANAKA',
           prmFirstName: 'TARO',
           sectionCode: 'SEC001',
           issueable: 'Y',
-          projectNumber: 'M5555J260300050',
           returnUrl: 'https://btos.example.com/callback',
         })
         .expect(201)
@@ -205,7 +205,7 @@ describe('JAL SSO (e2e)', () => {
     it('should handle special characters in field values', () => {
       return request(server)
         .post('/api/v1/integrations/jal/sso')
-        .send({ id: 'XC005&0870', prmSurName: '田中' })
+        .send({ id: 'XC005&0870', corpId: 'M5555', prmSurName: '田中' })
         .expect(201)
         .expect((res: request.Response) => {
           const body = asApiResponse<Record<string, unknown>>(res.body);

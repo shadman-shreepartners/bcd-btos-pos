@@ -5,6 +5,8 @@ import { AnaSsoRequestDto } from './dto/ana-sso-request.dto';
 import { AnaSsoResponseDto } from './dto/ana-sso-response.dto';
 import { mapToAnaSsoResponse } from './mapper/ana-sso.mapper';
 import { AnaCredentialRecord } from './types/ana.types';
+import { generateProjectNumber } from '../jal/utils/jal-project-number';
+import { SUPPLIER_KIND } from '../jal/constants/jal.constants';
 
 @Injectable()
 export class AnaService {
@@ -25,10 +27,25 @@ export class AnaService {
       request.employeeId,
     );
 
-    const response = mapToAnaSsoResponse(request, credential, {
-      ssoUrl: this.configService.getOrThrow<string>('ANA_SSO_URL'),
-      sendDataUrl: this.configService.getOrThrow<string>('ANA_SEND_DATA_URL'),
-    });
+    const projectNumber = generateProjectNumber(
+      request.corpId,
+      SUPPLIER_KIND.ANA,
+    );
+
+    this.logger.info(
+      { corpId: request.corpId, projectNumber },
+      'Generated ANA project number',
+    );
+
+    const response = mapToAnaSsoResponse(
+      request,
+      credential,
+      {
+        ssoUrl: this.configService.getOrThrow<string>('ANA_SSO_URL'),
+        sendDataUrl: this.configService.getOrThrow<string>('ANA_SEND_DATA_URL'),
+      },
+      projectNumber,
+    );
 
     this.logger.info(
       { companyId: request.companyId, employeeId: request.employeeId },

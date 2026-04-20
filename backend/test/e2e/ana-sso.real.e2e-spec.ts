@@ -97,7 +97,7 @@ describeRealAnaSso('ANA SSO real credentials (e2e)', () => {
       throw new Error(
         [
           'Set ANA_SSO_CREDENTIALS in .env before running this real-credentials test.',
-          'Optional DTO overrides: ANA_REAL_COMPANY_ID, ANA_REAL_EMPLOYEE_ID, ANA_REAL_PROJECT_NUMBER, ANA_REAL_DATE_FLIGHT1, ANA_REAL_DATE_FLIGHT2.',
+          'Optional DTO overrides: ANA_REAL_COMPANY_ID, ANA_REAL_EMPLOYEE_ID, ANA_REAL_CORP_ID, ANA_REAL_DATE_FLIGHT1, ANA_REAL_DATE_FLIGHT2.',
         ].join(' '),
       );
     }
@@ -105,7 +105,7 @@ describeRealAnaSso('ANA SSO real credentials (e2e)', () => {
     const dto: AnaSsoRequestDto = {
       companyId: process.env.ANA_REAL_COMPANY_ID ?? credential.companyId,
       employeeId: process.env.ANA_REAL_EMPLOYEE_ID ?? credential.employeeId,
-      projectNumber: process.env.ANA_REAL_PROJECT_NUMBER ?? 'TEST000001',
+      corpId: process.env.ANA_REAL_CORP_ID ?? 'M5555',
       dateFlight1: process.env.ANA_REAL_DATE_FLIGHT1 ?? '',
       dateFlight2: process.env.ANA_REAL_DATE_FLIGHT2 ?? '',
     };
@@ -133,15 +133,16 @@ describeRealAnaSso('ANA SSO real credentials (e2e)', () => {
           loginId: credential.loginId,
           adminUserId: credential.adminUserId,
           userId: credential.userId,
-          companyManagementCd1: dto.projectNumber.slice(-10),
           companyManagementCd2: credential.userId,
-          companyManagementCd3: credential.corpCode.slice(0, 6),
           sendDataFlg: '1',
           sendDataUrl: configService.getOrThrow<string>('ANA_SEND_DATA_URL'),
           sendDataType: '1',
           dateFlight1: dto.dateFlight1,
           dateFlight2: dto.dateFlight2,
         });
+
+        expect(body.data.fields.companyManagementCd1).toMatch(/^A\d{9}$/);
+        expect(body.data.fields.companyManagementCd3).toBe(dto.corpId);
 
         expect(body.data.fields.loginPw).toBeTruthy();
         expect(body.data.fields.passwd).toBeTruthy();

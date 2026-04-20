@@ -15,12 +15,13 @@ interface JalSsoConfig {
 }
 
 /**
- * Maps internal request DTO + config credentials into the full JAL SSO form payload.
+ * Maps internal request DTO + config credentials + generated project number into the full JAL SSO form payload.
  * Pure function — no side effects, easy to unit test.
  */
 export function mapToJalSsoResponse(
   request: JalSsoRequestDto,
   config: JalSsoConfig,
+  projectNumber: string,
 ): JalSsoResponseDto {
   const fields: JalSsoFormFields = {
     seamlessid: config.seamlessId,
@@ -33,7 +34,7 @@ export function mapToJalSsoResponse(
     ...(request.prmFirstName && { prmFirstName: request.prmFirstName }),
     ...(request.sectionCode && { sectionCode: request.sectionCode }),
     ...(request.issueable && { issueable: request.issueable }),
-    ...(request.projectNumber && { projectnumber: request.projectNumber }),
+    projectnumber: projectNumber,
     ...(request.returnUrl && { returnurl: request.returnUrl }),
   };
 

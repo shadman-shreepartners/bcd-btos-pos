@@ -53,7 +53,7 @@ describe('JalService', () => {
       expect(result.fields.id).toBe('XC0050870');
       expect(result.fields.acudId).toBe('TEST_ACUD_ID');
       expect(result.fields.acudPassword).toBe('TEST_ACUD_PASSWORD');
-      expect(result.fields.projectnumber).toBe('M5555J260300050');
+      expect(result.fields.projectnumber).toMatch(/^M5555J\d{9}$/);
     });
 
     it('should read all 5 config values via getOrThrow', () => {
@@ -80,7 +80,7 @@ describe('JalService', () => {
       const result = service.buildSsoPayload(minimalSsoRequest);
 
       expect(result.fields.id).toBe('MINIMAL_USER');
-      expect(result.fields.projectnumber).toBeUndefined();
+      expect(result.fields.projectnumber).toMatch(/^M5555J\d{9}$/);
       expect(result.fields.prmSurName).toBeUndefined();
     });
 
@@ -93,7 +93,7 @@ describe('JalService', () => {
       expect(result.fields.prmFirstName).toBe('TARO');
       expect(result.fields.sectionCode).toBe('SEC001');
       expect(result.fields.issueable).toBe('Y');
-      expect(result.fields.projectnumber).toBe('M5555J260300050');
+      expect(result.fields.projectnumber).toMatch(/^M5555J\d{9}$/);
       expect(result.fields.returnurl).toBe('https://btos.example.com/callback');
     });
 

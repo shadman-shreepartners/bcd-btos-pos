@@ -7,6 +7,10 @@ export class JalSsoRequestDto {
   id!: string;
 
   @IsString()
+  @IsNotEmpty()
+  corpId!: string;
+
+  @IsString()
   @IsOptional()
   password?: string;
 
@@ -25,10 +29,6 @@ export class JalSsoRequestDto {
   @IsString()
   @IsOptional()
   issueable?: string;
-
-  @IsString()
-  @IsOptional()
-  projectNumber?: string;
 
   @IsString()
   @IsOptional()

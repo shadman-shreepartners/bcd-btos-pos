@@ -38,7 +38,7 @@ export const ANA_CONFIG_ENV: Record<string, string> = {
 export const validAnaSsoRequest: AnaSsoRequestDto = {
   companyId: 'WEB_CUSTOMER_USERID',
   employeeId: 'WEB_CLIENT_USERID',
-  projectNumber: 'M5555A111111111',
+  corpId: 'M5555',
   dateFlight1: '20260510',
   dateFlight2: '20260911',
 };

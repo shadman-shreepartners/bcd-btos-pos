@@ -21,6 +21,7 @@ export function mapToAnaSsoResponse(
   request: AnaSsoRequestDto,
   credential: AnaCredentialRecord,
   config: AnaSsoConfig,
+  projectNumber: string,
 ): AnaSsoResponseDto {
   const fields: AnaSsoFormFields = {
     loginId: credential.loginId,
@@ -28,9 +29,9 @@ export function mapToAnaSsoResponse(
     adminUserId: credential.adminUserId,
     userId: credential.userId,
     passwd: credential.passwd,
-    companyManagementCd1: request.projectNumber.slice(-10),
+    companyManagementCd1: projectNumber.slice(-10),
     companyManagementCd2: credential.userId,
-    companyManagementCd3: request.projectNumber.slice(0, -10),
+    companyManagementCd3: projectNumber.slice(0, -10),
     sendDataFlg: ANA_SSO_SEND_DATA_FLG,
     sendDataUrl: config.sendDataUrl,
     sendDataType: ANA_SSO_SEND_DATA_TYPE,

@@ -12,7 +12,7 @@ export class AnaSsoRequestDto {
 
   @IsString()
   @IsNotEmpty()
-  projectNumber!: string;
+  corpId!: string;
 
   @IsString()
   @IsOptional()

@@ -13,6 +13,8 @@ import { JalRetrieveResponseDto } from './dto/jal-retrieve-response.dto';
 import { mapSoapToJalRetrieveResponse } from './mapper/jal-booking.mapper';
 import { mapToJalSsoResponse } from './mapper/jal-sso.mapper';
 import { JalSoapClient } from './jal-soap.client';
+import { generateProjectNumber } from './utils/jal-project-number';
+import { SUPPLIER_KIND } from './constants/jal.constants';
 
 @Injectable()
 export class JalService {
@@ -25,8 +27,18 @@ export class JalService {
 
   /** Builds the JAL SSO form payload by merging request data with config credentials */
   buildSsoPayload(request: JalSsoRequestDto): JalSsoResponseDto {
+    const projectNumber = generateProjectNumber(
+      request.corpId,
+      SUPPLIER_KIND.JAL,
+    );
+
     this.logger.info(
-      { userId: request.id, action: 'buildSsoPayload' },
+      {
+        userId: request.id,
+        corpId: request.corpId,
+        projectNumber,
+        action: 'buildSsoPayload',
+      },
       'Building SSO payload',
     );
 
@@ -38,11 +50,12 @@ export class JalService {
       acudPassword: this.configService.getOrThrow<string>('JAL_ACUD_PASSWORD'),
     };
 
-    const response = mapToJalSsoResponse(request, config);
+    const response = mapToJalSsoResponse(request, config, projectNumber);
 
     this.logger.info(
       {
         userId: request.id,
+        projectNumber,
         targetUrl: response.targetUrl,
         action: 'buildSsoPayload',
       },

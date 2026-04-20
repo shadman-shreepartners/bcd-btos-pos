@@ -74,7 +74,7 @@ describe('ANA SSO (e2e)', () => {
         .send({
           companyId: 'WEB_CUSTOMER_USERID',
           employeeId: 'WEB_CLIENT_USERID',
-          projectNumber: 'M5555A111111111',
+          corpId: 'M5555',
           dateFlight1: '20260510',
           dateFlight2: '20260911',
         })
@@ -96,7 +96,8 @@ describe('ANA SSO (e2e)', () => {
 
           const fields = data.fields as Record<string, unknown>;
           expect(fields.loginId).toBe('SCL96022');
-          expect(fields.companyManagementCd1).toBe('A111111111');
+          expect(fields.companyManagementCd1).toMatch(/^A\d{9}$/);
+          expect(fields.companyManagementCd3).toBe('M5555');
           expect(fields.sendDataUrl).toBe(
             '/api/v1/integrations/ana/sso/callback',
           );
@@ -125,7 +126,7 @@ describe('ANA SSO (e2e)', () => {
         .send({
           companyId: 'WEB_CUSTOMER_USERID',
           employeeId: 'WEB_CLIENT_USERID',
-          projectNumber: 'M5555A111111111',
+          corpId: 'M5555',
           hackerField: 'malicious',
         })
         .expect(400)
@@ -141,7 +142,7 @@ describe('ANA SSO (e2e)', () => {
         .send({
           companyId: 'UNKNOWN',
           employeeId: 'UNKNOWN',
-          projectNumber: 'M5555A111111111',
+          corpId: 'M5555',
         })
         .expect(404)
         .expect((res: request.Response) => {

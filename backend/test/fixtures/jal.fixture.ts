@@ -34,30 +34,31 @@ export const JAL_CONFIG_ENV: Record<string, string> = {
 
 export const validSsoRequest: JalSsoRequestDto = {
   id: 'XC0050870',
-  projectNumber: 'M5555J260300050',
+  corpId: 'M5555',
 };
 
 export const minimalSsoRequest: JalSsoRequestDto = {
   id: 'MINIMAL_USER',
+  corpId: 'M5555',
 };
 
 export const fullSsoRequest: JalSsoRequestDto = {
   id: 'XC0050870',
+  corpId: 'M5555',
   password: 'pass123',
   prmSurName: 'TANAKA',
   prmFirstName: 'TARO',
   sectionCode: 'SEC001',
   issueable: 'Y',
-  projectNumber: 'M5555J260300050',
   returnUrl: 'https://btos.example.com/callback',
 };
 
 export const specialCharsRequest: JalSsoRequestDto = {
   id: 'XC005&0870',
+  corpId: 'M5555',
   password: 'p@ss=123&key',
   prmSurName: '田中',
   prmFirstName: '太郎',
-  projectNumber: 'M5555J260300050',
 };
 
 /** Literal union for strict key typing where needed */
