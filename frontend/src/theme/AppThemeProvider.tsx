@@ -7,10 +7,6 @@ type AppThemeProviderProps = {
   children: ReactNode;
 };
 
-/**
- * Single place to mount MUI theme + CssBaseline.
- * Import global SCSS (`src/styles/global.scss`) once in `main.tsx` before this provider.
- */
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
     <ThemeProvider theme={appTheme}>

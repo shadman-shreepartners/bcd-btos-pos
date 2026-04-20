@@ -19,7 +19,11 @@ interface SidebarProps {
   onNavigate?: () => void;
 }
 
-const Sidebar = ({ sections, mobileOpen = false, onNavigate }: SidebarProps) => {
+const Sidebar = ({
+  sections,
+  mobileOpen = false,
+  onNavigate,
+}: SidebarProps) => {
   const theme = useTheme();
   const isLg = useMediaQuery(theme.breakpoints.up("lg"));
   const ariaHidden = !isLg && !mobileOpen;
@@ -32,23 +36,26 @@ const Sidebar = ({ sections, mobileOpen = false, onNavigate }: SidebarProps) => 
       className={`${styles.root} ${mobileOpen ? styles.mobileOpen : ""}`}
     >
       <Box className={styles.header}>
-        <Box
-          component="img"
-          src={logo}
-          alt="TripSource Logo"
-          width={160}
-          height={60}
-          decoding="async"
+        <NavLink
+          to="/home"
+          end
           onClick={onNavigate}
-          className={styles.logo}
-        />
+          className={styles.logoLink}
+          aria-label="TripSource, go to home"
+        >
+          <Box
+            component="img"
+            src={logo}
+            alt=""
+            width={160}
+            height={60}
+            decoding="async"
+            className={styles.logo}
+          />
+        </NavLink>
       </Box>
 
-      <Box
-        component="nav"
-        aria-label="Main Navigation"
-        className={styles.nav}
-      >
+      <Box component="nav" aria-label="Main Navigation" className={styles.nav}>
         {sections.map((section) => (
           <Box key={section.titleKey} className={styles.section}>
             <Typography component="p" className={styles.sectionLabel}>
@@ -58,7 +65,11 @@ const Sidebar = ({ sections, mobileOpen = false, onNavigate }: SidebarProps) => 
               {section.items.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <ListItem key={item.to} disablePadding className={styles.listItem}>
+                  <ListItem
+                    key={item.to}
+                    disablePadding
+                    className={styles.listItem}
+                  >
                     <NavLink
                       to={item.to}
                       end={item.end}
@@ -69,8 +80,9 @@ const Sidebar = ({ sections, mobileOpen = false, onNavigate }: SidebarProps) => 
                         <ListItemButton
                           component="div"
                           selected={isActive}
-                          className={`${styles.listItemButton} ${isActive ? styles.active : ""
-                            }`}
+                          className={`${styles.listItemButton} ${
+                            isActive ? styles.active : ""
+                          }`}
                         >
                           {Icon && (
                             <ListItemIcon className={styles.icon}>
@@ -104,4 +116,3 @@ const Sidebar = ({ sections, mobileOpen = false, onNavigate }: SidebarProps) => 
 };
 
 export default Sidebar;
-

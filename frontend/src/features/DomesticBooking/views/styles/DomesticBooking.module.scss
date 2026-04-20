@@ -1,26 +1,14 @@
-.title {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 12px 20px;
- 
-  font-weight: 600;
-
-  .MuiTypography-root {
-    font-size: 8px;
-  }
-}
-
 .tabBar {
   background: var(--page);
-  border-radius:1rem ;
+  border-radius: 1rem;
   padding: 0.25rem;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
   display: flex;
   justify-content: center;
 }
 
 .tabBar :global(.MuiTab-root.Mui-selected) {
-  color: #ffffff !important;
-  background-color: #2563eb !important;
+  color: var(--header-bg) !important;
+  background-color: var(--accent) !important;
   border-radius: 1rem;
 }
 
@@ -33,23 +21,150 @@
   min-width: 140px;
   font-weight: 700;
   border-radius: 999px;
-  color: #475569;
+  color: var(--slate-muted);
   background: transparent;
   margin: 0 0.25rem;
 }
 
 .tabItem:hover {
   border-radius: 1rem;
-  background: #e2e8f0;
+  background: color-mix(in srgb, var(--navy) 6%, var(--page));
 }
 
 .tabItemActive {
-  color: #fff;
-  background: #3b82f6;
+  color: var(--header-bg);
+  background: var(--accent);
 }
 
 .tabItemActive:hover {
-  padding: auto;
   border-radius: 16px;
-  background: #2563eb;
+  background: var(--accent);
+}
+
+.itineraryCard {
+  background: #fff;
+  border-radius: 12px !important;
+  border: 1px solid #e8ecf1 !important;
+  box-shadow: none;
+}
+
+.itineraryCardInner {
+  display: flex;
+  align-items: stretch;
+  min-height: 96px;
+}
+
+.itineraryCardRail {
+  flex: 0 0 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 10px 12px;
+  border-right: 1px solid #e8ecf1;
+  background: #fafbfc;
+}
+
+.itineraryCardIndexSmall {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.itineraryCardIconCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.itineraryCardIconGlyph {
+  color: #2563eb;
+}
+
+.itineraryCardMain {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.itineraryBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.itineraryBadgeRail {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.itineraryBadgeHotel {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.itineraryBadgeCar {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.itineraryBadgeFlight {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.itineraryCardTitle {
+  margin: 0 !important;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.itineraryCardSubline {
+  margin: 0 !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.itineraryCardMeta {
+  margin: 0 !important;
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.itineraryCardActions {
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px 10px 4px;
+}
+
+.itineraryCardEditBtn:global(.MuiIconButton-root) {
+  color: #2563eb;
+  padding: 6px;
+}
+
+.itineraryCardEditBtn:global(.MuiIconButton-root):hover {
+  background: rgba(37, 99, 235, 0.08);
 }

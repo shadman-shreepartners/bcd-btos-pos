@@ -1,7 +1,7 @@
-// JR / offline transport
+// JR / offline transport — prefer global tokens (see src/styles/tokens.scss)
 .emptyState {
   padding: 24px 16px;
-  color: #64748b;
+  color: var(--sublabel);
   font-size: 14px;
 }
 
@@ -11,14 +11,14 @@
 
 .jrNotice {
   padding: 12px 16px;
-  background-color: #fffaf3;
+  background-color: color-mix(in srgb, var(--accent) 6%, var(--header-bg));
   border-radius: 8px;
-  border: 1px solid #edf1f7;
+  border: 1px solid color-mix(in srgb, var(--navy-muted) 18%, var(--border));
 }
 
 .jrNoticeText {
   font-size: 14px;
-  color: #334155;
+  color: var(--slate-muted);
 }
 
 .jrFormSection {
@@ -29,7 +29,7 @@
 .fieldLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #5b6b83;
+  color: var(--label);
 }
 
 .formRow {
@@ -45,35 +45,35 @@
 }
 
 .mutedArrow {
-  color: #94a3b8;
+  color: var(--navy-muted);
 }
 
 .legLabel {
   font-size: 12px;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--navy-muted);
 }
 
 .remarksHelper {
   margin-top: 12px;
   font-size: 13px;
   font-style: italic;
-  color: #64748b;
+  color: var(--sublabel);
 }
 
 .remarksHelperTight {
   margin-top: 6px;
   font-size: 13px;
   font-style: italic;
-  color: #64748b;
+  color: var(--sublabel);
 }
 
 // Hotel
 .hotelPaper {
-  border: 1px solid #edf1f7;
+  border: 1px solid color-mix(in srgb, var(--navy-muted) 16%, var(--border));
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: var(--header-bg);
 }
 
 .hotelInner {
@@ -245,4 +245,154 @@
     background-color: #1f6ed8;
     box-shadow: none;
   }
+}
+.carPaper {
+  margin: 16px;
+  border: 1px solid #edf1f7;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.carSection {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.flightDetailTabs {
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+  background: var(--page);
+}
+
+.flightDetailTabs :global(.MuiTab-root.Mui-selected) {
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.flightTab:global(.MuiTab-root) {
+  border-radius: 0.5rem;
+  background: var(--header-bg);
+  color: var(--slate-muted);
+  font-size: 12px;
+  font-weight: 700;
+  // text-transform: none;
+}
+
+.flightSearchRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0 14px;
+}
+
+.flightSearchButton:global(.MuiButton-root) {
+  min-width: 160px;
+  height: 38px;
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 700;
+  background: var(--badge);
+  box-shadow: none;
+  color:var(--header-bg);
+
+  :global(.MuiButton-startIcon) {
+    color: var(--header-bg);
+  }
+}
+
+.flightSearchButton:global(.MuiButton-root):hover {
+  background: #df3131;
+  box-shadow: none;
+}
+
+.flightOriginDestWithSearch {
+  align-items: flex-end;
+}
+
+.flightSwapIcon {
+  color: #94a3b8;
+  cursor: pointer;
+  vertical-align: middle;
+
+  &:hover {
+    color: #64748b;
+  }
+}
+
+.flightContinueRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 0 20px;
+}
+
+.flightContinueButton:global(.MuiButton-root) {
+  min-width: 220px;
+  height: 38px;
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 700;
+  background: #e8f1ff;
+  color: #2f80ed;
+  box-shadow: none;
+
+  &:hover {
+    background: #d9e8ff;
+    box-shadow: none;
+  }
+}
+
+.flightReturnArrowIcon {
+  color: #b8c4d6;
+}
+
+.flightReturnSearchRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 0 4px;
+}
+
+.flightReturnFooterActions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 0 12px;
+  margin-top: 4px;
+  border-top: 1px solid #f2f5fa;
+}
+
+.flightBackToOrigin:global(.MuiButton-root) {
+  min-width: 148px;
+  height: 38px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 700;
+  border-color: #cfd8e6;
+  color: #3f4f6d;
+  background-color: #fff;
+  box-shadow: none;
+
+  &:hover {
+    border-color: #b9c6d8;
+    background-color: #fafbfd;
+    box-shadow: none;
+  }
+}
+
+.flightAddItinerary:global(.MuiButton-root) {
+  min-width: 168px;
+  height: 38px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 700;
+  box-shadow: none;
+  background-color: #dfe6f0;
+  color: #9aa8bc;
+}
+
+.flightAddItinerary:global(.MuiButton-root.Mui-disabled) {
+  background-color: #dfe6f0;
+  color: #aab8cc;
 }

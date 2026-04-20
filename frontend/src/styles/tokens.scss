@@ -1,5 +1,3 @@
-// Design tokens as CSS custom properties (for SCSS modules and plain CSS).
-// Keep values aligned with src/theme/tokens.ts (colorTokens).
 
 :root {
   --navy: #002654;
@@ -14,4 +12,16 @@
   --sidebar-active-bg: #1e3f86;
   --sidebar-divider: rgba(255, 255, 255, 0.12);
   --badge: #e53935;
+  --alert-error-bg: color-mix(in srgb, var(--badge) 8%, var(--header-bg));
+  --table-head-bg: color-mix(in srgb, var(--navy-muted) 12%, var(--header-bg));
+
+  --icon-well-bg: color-mix(in srgb, var(--navy) 6%, var(--header-bg));
+  --card-shadow-hover: 0 4px 12px color-mix(in srgb, var(--navy) 10%, transparent);
+  --itinerary-icon-rail: #2563eb;
+  --itinerary-icon-flight: #dc2626;
+  --itinerary-icon-corporate: #1d4ed8;
+  --itinerary-icon-neutral: #111827;
+  --itinerary-icon-hotel: #2563eb;
+  --itinerary-icon-portal: #16a34a;
 }
+

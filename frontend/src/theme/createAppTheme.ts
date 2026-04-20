@@ -6,6 +6,7 @@ import { components } from "./overrides";
 /**
  * Extend the theme in this order: `tokens.ts` + `styles/tokens.scss` → `palette.ts` / `typography.ts` → `overrides.ts`.
  */
+
 export const appTheme = createTheme({
   breakpoints: {
     values: {

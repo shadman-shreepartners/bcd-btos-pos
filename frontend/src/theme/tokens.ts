@@ -1,12 +1,7 @@
-/**
- * Canonical color values for the MUI theme palette.
- * When you change a value here, update the matching variable in src/styles/tokens.scss.
- */
 export const colorTokens = {
   navy: "#002654",
   navyMuted: "#94a8c4",
   accent: "#1890ff",
-  /** Primary actions (e.g. contained button hover). */
   accentHover: "#1478e6",
   page: "#f0f2f5",
   border: "#d9d9d9",
@@ -16,4 +11,6 @@ export const colorTokens = {
   slateMuted: "#3d4d63",
   sidebarActiveBg: "#1e3f86",
   badge: "#e53935",
+  primary: "#0f172a",
+  secondary: "#64748b",
 } as const;

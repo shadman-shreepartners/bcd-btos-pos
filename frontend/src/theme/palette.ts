@@ -14,8 +14,8 @@ export const palette: PaletteOptions = {
     paper: colorTokens.headerBg,
   },
   text: {
-    primary: "#0f172a",
-    secondary: "#64748b",
+    primary: colorTokens.primary,
+    secondary: colorTokens.secondary,
   },
   divider: colorTokens.border,
 };

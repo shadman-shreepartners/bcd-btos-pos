@@ -4,16 +4,13 @@ import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
+import PunchoutLockScreen from "./PunchoutLockScreen";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { sidebarNavSections } from "../utils/constants";
 import styles from "./styles/RootLayout.module.scss";
 
-interface RootLayoutProps {
-  // Add props if needed
-}
-
-const RootLayout = ({ }: RootLayoutProps) => {
+const RootLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isLg = useMediaQuery(theme.breakpoints.up("lg"));
@@ -52,13 +49,14 @@ const RootLayout = ({ }: RootLayoutProps) => {
 
       <Box className={styles.mainContainer}>
         <Topbar menuOpen={mobileOpen} onMenuClick={toggleSidebar} />
-        {/* <Topbar /> */}
         <Box component="main" className={styles.mainContent}>
           <Box className={styles.contentWrapper}>
             <Outlet />
           </Box>
         </Box>
       </Box>
+
+      <PunchoutLockScreen />
     </Box>
   );
 };

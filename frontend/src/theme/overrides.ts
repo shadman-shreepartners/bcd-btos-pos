@@ -1,10 +1,6 @@
 import { alpha } from "@mui/material/styles";
 import type { ThemeOptions } from "@mui/material/styles";
 
-/**
- * MUI component defaults and style overrides.
- * Prefer extending this file over scattering `!important` / `:global(.Mui-*)` in CSS modules.
- */
 export const components = {
   MuiCssBaseline: {
     styleOverrides: {
@@ -102,7 +98,7 @@ export const components = {
       root: {
         "&.Mui-selected": {
           backgroundColor: "var(--sidebar-active-bg)",
-          borderLeft: " 3px solid #0f2b66",
+          borderLeft: " 3px solid var(--navy)",
           borderRadius: "10px",
           "&:hover": {
             backgroundColor: "var(--sidebar-active-bg)",

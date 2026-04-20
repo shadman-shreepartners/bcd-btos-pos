@@ -16,6 +16,3 @@ export const cssVars = {
   sidebarDivider: "var(--sidebar-divider)",
   badge: "var(--badge)",
 } as const;
-
-/** Alias for older code; prefer `cssVars`. */
-export const trip = cssVars;

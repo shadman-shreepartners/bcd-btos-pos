@@ -1,17 +1,22 @@
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { Menu } from "lucide-react";
 import { useTheme } from "@mui/material/styles";
 
 import styles from "./styles/Topbar.module.scss";
 
-interface TopbarProps {
+const defaultMenuClick = () => {};
+
+export interface TopbarProps {
   menuOpen?: boolean;
   onMenuClick?: () => void;
 }
 
-const Topbar = ({ menuOpen = false, onMenuClick }: TopbarProps) => {
+const Topbar = ({
+  menuOpen = false,
+  onMenuClick = defaultMenuClick,
+}: TopbarProps) => {
   const theme = useTheme();
   const isLg = useMediaQuery(theme.breakpoints.up("lg"));
 
@@ -33,7 +38,7 @@ const Topbar = ({ menuOpen = false, onMenuClick }: TopbarProps) => {
             className={styles.menuButton}
             size="large"
           >
-            <MenuIcon />
+            <Menu size={24} aria-hidden />
           </IconButton>
         )}
 
